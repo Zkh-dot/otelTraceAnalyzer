@@ -1,15 +1,16 @@
-#include "counters.h"
-#include "span.h"
+#include "structures/counters.h"
+#include "structures/span.h"
+#include "structures/trace.h"
+#include "structures/service.h"
 
 int main() {
-    Span* span = (Span*)malloc(sizeof(Span));
-    char* spanId = (char*)"spanId";
+    struct hashmap* stringToServiceMap = GetStringToServiceMap();
     char* serviceName = (char*)"serviceName";
-    Span* parentSpan = NULL;
-    span = InitSpan(span, spanId, serviceName, parentSpan);
+    Service* service = AddNewService(stringToServiceMap, serviceName);
+    
+    Service* foundService = FindService(stringToServiceMap, serviceName);
 
-    spanId = (char*)""; serviceName = (char*)"";
-
-    FreeSpan(span);
+    FreeStringToServiceMap(stringToServiceMap);
+        
     return 0;
 }

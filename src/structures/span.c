@@ -1,5 +1,14 @@
 #include "span.h"
 
+const char* spanStatusMessage[TraceOk + 1] = {
+    "UndefSpanStatus",
+    "MissingParent",
+    "NoParentInTrace",
+    "DublicateSpan",
+    "BadSpanIdSize",
+    "SpanOk",
+};
+
 Span* InitSpan(Span* span, char* spanId, char* serviceName, Span* parentSpan) {
     span->spanId = (char*)malloc(strlen(spanId) + 1);
     strcpy(span->spanId, spanId);

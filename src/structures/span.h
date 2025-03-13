@@ -4,6 +4,9 @@
 #include <string.h> 
 #include <stdlib.h>
 
+
+extern const char* spanStatusMessage[TraceOk + 1];
+
 typedef struct Span_{
     char* spanId;
     char* serviceName;

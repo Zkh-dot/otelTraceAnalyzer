@@ -14,6 +14,7 @@ typedef enum {
 
 typedef enum {
     UndefTraceStatus,
+
     myMissingParent,
     notmyMissingParent,
 
@@ -28,6 +29,7 @@ typedef enum {
 
     myBadTraceIdSize,
     notmyBadTraceIdSize,
+    
     TraceOk,
 } TraceStatusTypes;
 
@@ -45,3 +47,10 @@ void FreeServiceErrorCounters(ServiceErrorCounters* counters);
 
 void sumCounters(ServiceErrorCounters* errorCounters, ServiceErrorCounters* errorCounters2);
 
+void IncCounters(ServiceErrorCounters* errorCounters, SpanStatusTypes status, char* traceId, bool isMy);
+
+void DecCounters(ServiceErrorCounters* errorCounters, SpanStatusTypes status, char* traceId, bool isMy);
+
+void AppendExample(ServiceErrorCounters* errorCounters, char* traceId, bool isMy);
+
+bool IsRootSpanError(ServiceErrorCounters* errorCounters);

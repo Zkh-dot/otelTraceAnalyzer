@@ -1,17 +1,23 @@
 #include "trace.h"
 
-const char* traceCountMessage[TraceOk] = {
+const char* traceStatusMessage[TraceOk + 1] = {
     "UndefTraceStatus",
+
     "myMissingParent",
     "notmyMissingParent",
+
     "myNoParentInTrace",
     "notmyNoParentInTrace",
+
     "myDublicateSpan",
     "notmyDublicateSpan",
+
     "myBadSpanIdSize",
     "notmyBadSpanIdSize",
+
     "myBadTraceIdSize",
     "notmyBadTraceIdSize",
+
     "TraceOk",
 };
 
@@ -97,7 +103,7 @@ char* ScanTrace(const char *field, const char *trace) {
     return value;
 }
 
-Span* FindAllSpans(Trace* trace) {
+Span** FindAllSpans(Trace* trace) {
     int SpansCount = CountSpans(trace->traceString);
     Span** spans = (Span**)malloc(SpansCount * sizeof(Span*));
     

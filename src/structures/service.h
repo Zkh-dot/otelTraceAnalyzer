@@ -1,3 +1,5 @@
+#pragma once
+
 #include "trace.h"
 #include "counters.h"
 

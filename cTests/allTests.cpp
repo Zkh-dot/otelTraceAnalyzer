@@ -1,9 +1,11 @@
 #include <gtest/gtest.h>
 extern "C" {
-    #include "../src/counters.h"
-    #include "../src/span.h"
-    #include "../src/config.h"
-    #include "../src/trace.h"
+    #include "../src/structures/counters.h"
+    #include "../src/structures/span.h"
+    #include "../src/structures/config.h"
+    #include "../src/structures/trace.h"
+    #include "../src/structures/service.h"
+    #include "../src/structures/servicemap.h"
 }
 // counters
 ServiceErrorCounters* initEmptyCounters() {
@@ -70,6 +72,75 @@ TEST(Traces, InitTrace) {
     EXPECT_EQ(strlen(trace->serviceName), strlen("serviceName"));
     EXPECT_EQ(strlen(trace->traceId), strlen("traceId"));
     // FreeTrace(trace);
+}
+
+TEST(Traces, FreeTrace) {
+    Trace* trace = (Trace*)malloc(sizeof(Trace));
+    char* traceString = (char*)"traceString";
+    char* serviceName = (char*)"serviceName";
+    char* traceId = (char*)"traceId";
+    trace = InitTrace(trace, traceString, serviceName, traceId);
+    FreeTrace(trace);
+}
+
+TEST(Service, InitService) {
+    Service* service = (Service*)malloc(sizeof(Service));
+    char* serviceName = (char*)"serviceName";
+    service = InitService(service, serviceName);
+
+    serviceName = (char*)"";
+
+    EXPECT_EQ(strlen(service->serviceName), strlen("serviceName"));
+    // FreeService(service);
+}
+
+TEST(Service, FreeService) {
+    Service* service = (Service*)malloc(sizeof(Service));
+    char* serviceName = (char*)"serviceName";
+    service = InitService(service, serviceName);
+    FreeService(service);
+}
+
+TEST(StringToService, InitStringToService) {
+    struct StringToService* stringToService = (struct StringToService*)malloc(sizeof(struct StringToService));
+    char* string = (char*)"string";
+    Service* service = (Service*)malloc(sizeof(Service));
+    service = InitService(service, string);
+    stringToService = InitStringToService(stringToService, string, service);
+
+    string = (char*)"";
+
+    EXPECT_EQ(strlen(stringToService->string), strlen("string"));
+    // FreeStringToService(stringToService);
+}
+
+TEST(StringToService, FreeStringToService) {
+    struct StringToService* stringToService = (struct StringToService*)malloc(sizeof(struct StringToService));
+    char* string = (char*)"string";
+    Service* service = (Service*)malloc(sizeof(Service));
+    service = InitService(service, string);
+    stringToService = InitStringToService(stringToService, string, service);
+    FreeStringToService(stringToService);
+}
+
+TEST(StringToService, AddNewService) {
+    struct hashmap* stringToServiceMap = GetStringToServiceMap();
+    char* serviceName = (char*)"serviceName";
+    Service* service = AddNewService(stringToServiceMap, serviceName);
+    EXPECT_EQ(strlen(service->serviceName), strlen("serviceName"));
+    FreeStringToServiceMap(stringToServiceMap);
+}
+
+TEST(StringToService, FindAddedService) {
+    struct hashmap* stringToServiceMap = GetStringToServiceMap();
+    char* serviceName = (char*)"serviceName";
+    Service* service = AddNewService(stringToServiceMap, serviceName);
+    
+    Service* foundService = FindService(stringToServiceMap, serviceName);
+
+    EXPECT_EQ(strlen(foundService->serviceName), strlen("serviceName"));
+    FreeStringToServiceMap(stringToServiceMap);
+    
 }
 
 int main() {
