@@ -1,0 +1,3 @@
+#define TRACE_ID_LENGTH 32
+#define SPAN_ID_LENGTH 16
+#define EXAMPLES_LENGTH 10

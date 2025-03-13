@@ -50,3 +50,16 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+#cmake files
+CMakeFiles/*
+cmake_install.cmake
+CMakeCache.txt
+Makefile
+
+#binary files
+analyzerV1
+tests
+
+#tests
+Testing/*
