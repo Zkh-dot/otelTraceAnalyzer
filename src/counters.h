@@ -4,6 +4,7 @@
 #include <stdlib.h>
 
 typedef enum {
+    UndefSpanStatus,
     MissingParent,
     NoParentInTrace,
     DublicateSpan,
@@ -12,6 +13,7 @@ typedef enum {
 } SpanStatusTypes;
 
 typedef enum {
+    UndefTraceStatus,
     myMissingParent,
     notmyMissingParent,
 

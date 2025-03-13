@@ -5,9 +5,7 @@ ServiceErrorCounters* InitServiceErrorCounters(ServiceErrorCounters* counters) {
         counters->statusCounter[i] = 0;
     }
     for(int i = 0; i < EXAMPLES_LENGTH; i++) {
-        counters->myBadTraceExamples[i] = (char*)malloc(TRACE_ID_LENGTH);
         counters->myBadTraceExamples[i] = "";
-        counters->notmyBadTraceExamples[i] = (char*)malloc(TRACE_ID_LENGTH);
         counters->notmyBadTraceExamples[i] = "";
     }
     counters->myExamplesCount = 0;
@@ -16,10 +14,10 @@ ServiceErrorCounters* InitServiceErrorCounters(ServiceErrorCounters* counters) {
 }
 
 void FreeServiceErrorCounters(ServiceErrorCounters* counters) {
-    for(int i = 0; i < EXAMPLES_LENGTH; i++) {
-        free(counters->myBadTraceExamples[i]);
-        free(counters->notmyBadTraceExamples[i]);
-    }
+    // for(int i = 0; i < EXAMPLES_LENGTH; i++) {
+    //     free(counters->myBadTraceExamples[i]);
+    //     free(counters->notmyBadTraceExamples[i]);
+    // }
     free(counters);
 }
 

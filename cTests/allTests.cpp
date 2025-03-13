@@ -1,7 +1,9 @@
 #include <gtest/gtest.h>
 extern "C" {
     #include "../src/counters.h"
+    #include "../src/span.h"
     #include "../src/config.h"
+    #include "../src/trace.h"
 }
 // counters
 ServiceErrorCounters* initEmptyCounters() {
@@ -29,6 +31,45 @@ TEST(Counters, FreeServiceErrorCounters) {
     ServiceErrorCounters* counters = (ServiceErrorCounters*)malloc(sizeof(ServiceErrorCounters));
     counters = initEmptyCounters();
     FreeServiceErrorCounters(counters);
+}
+
+TEST(Spans, InitSpan) {
+    Span* span = (Span*)malloc(sizeof(Span));
+    char* spanId = (char*)"spanId";
+    char* serviceName = (char*)"serviceName";
+    Span* parentSpan = NULL;
+    span = InitSpan(span, spanId, serviceName, parentSpan);
+
+    spanId = (char*)""; serviceName = (char*)"";
+
+    EXPECT_EQ(strlen(span->spanId), strlen("spanId"));
+    EXPECT_EQ(strlen(span->serviceName), strlen("serviceName"));
+    EXPECT_EQ(span->spanStatus, UndefSpanStatus);
+    // FreeSpan(span);
+}
+
+TEST(Spans, FreeSpan) {
+    Span* span = (Span*)malloc(sizeof(Span));
+    char* spanId = (char*)"spanId";
+    char* serviceName = (char*)"serviceName";
+    Span* parentSpan = NULL;
+    span = InitSpan(span, spanId, serviceName, parentSpan);
+    FreeSpan(span);
+}
+
+TEST(Traces, InitTrace) {
+    Trace* trace = (Trace*)malloc(sizeof(Trace));
+    char* traceString = (char*)"traceString";
+    char* serviceName = (char*)"serviceName";
+    char* traceId = (char*)"traceId";
+    trace = InitTrace(trace, traceString, serviceName, traceId);
+
+    traceString = (char*)""; serviceName = (char*)""; traceId = (char*)"";
+
+    EXPECT_EQ(strlen(trace->traceString), strlen("traceString"));
+    EXPECT_EQ(strlen(trace->serviceName), strlen("serviceName"));
+    EXPECT_EQ(strlen(trace->traceId), strlen("traceId"));
+    // FreeTrace(trace);
 }
 
 int main() {
