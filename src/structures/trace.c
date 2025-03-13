@@ -116,7 +116,7 @@ Span** FindAllSpans(Trace* trace) {
     while (token != NULL && i < SpansCount) {
         char* spanId = ScanTrace("spanId", token);
         char* serviceName = ScanTrace("serviceName", token);
-        spans[i] = InitSpan(spans[i], spanId, serviceName, NULL);
+        InitSpan(spans[i], spanId, serviceName, NULL);
         hashset_add(trace->spanIds, spans[i]->spanId);
         i++;
         token = LongStrTok(NULL, Delimiter);
@@ -126,7 +126,7 @@ Span** FindAllSpans(Trace* trace) {
     return spans;
 }
 
-Trace* InitTrace(Trace* trace, char* traceString, char* serviceName, char* traceId) {
+void InitTrace(Trace* trace, char* traceString, char* serviceName, char* traceId) {
     trace->traceString = (char*)malloc(strlen(traceString) + 1);
     strcpy(trace->traceString, traceString);
     trace->serviceName = (char*)malloc(strlen(serviceName) + 1);
@@ -134,7 +134,6 @@ Trace* InitTrace(Trace* trace, char* traceString, char* serviceName, char* trace
     trace->traceId = (char*)malloc(strlen(traceId) + 1);
     strcpy(trace->traceId, traceId);
     trace->spanIds = hashset_create();
-    return trace;
 }
 
 void FreeTrace(Trace* trace) {

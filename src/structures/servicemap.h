@@ -15,7 +15,7 @@ int StringToServiceCompare(const void *a, const void *b, void *udata);
 
 uint64_t StringToServiceHash(const void *item, uint64_t seed0, uint64_t seed1);
 
-struct StringToService* InitStringToService(struct StringToService* stringToService, char* string, Service* service);
+void InitStringToService(struct StringToService* stringToService, char* string, Service* service);
 
 struct hashmap* GetStringToServiceMap();
 

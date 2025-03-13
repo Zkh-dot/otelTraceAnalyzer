@@ -1,11 +1,10 @@
 #include "service.h"
 
-Service* InitService(Service* service, char* serviceName) {
+void InitService(Service* service, char* serviceName) {
     service->serviceName = (char*)malloc(strlen(serviceName) + 1);
     strcpy(service->serviceName, serviceName);
     service->errorCounters = (ServiceErrorCounters*)malloc(sizeof(ServiceErrorCounters));
-    service->errorCounters = InitServiceErrorCounters(service->errorCounters);
-    return service;
+    InitServiceErrorCounters(service->errorCounters);
 }
 
 void FreeService(Service* service) {

@@ -2,6 +2,7 @@
 #include "structures/span.h"
 #include "structures/trace.h"
 #include "structures/service.h"
+#include "structures/servicemap.h"
 
 int main() {
     struct hashmap* stringToServiceMap = GetStringToServiceMap();

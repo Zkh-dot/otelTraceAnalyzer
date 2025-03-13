@@ -8,6 +8,6 @@ typedef struct {
     ServiceErrorCounters* errorCounters;    
 } Service;
 
-Service* InitService(Service* service, char* serviceName);
+void InitService(Service* service, char* serviceName);
 
 void FreeService(Service* service);

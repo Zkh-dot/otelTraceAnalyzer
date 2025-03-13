@@ -7,16 +7,10 @@ extern "C" {
     #include "../src/structures/service.h"
     #include "../src/structures/servicemap.h"
 }
-// counters
-ServiceErrorCounters* initEmptyCounters() {
-    ServiceErrorCounters* counters = (ServiceErrorCounters*)malloc(sizeof(ServiceErrorCounters));
-    counters = InitServiceErrorCounters(counters);
-    return counters;
-}
 
 TEST(Counters, InitServiceErrorCounters) {
     ServiceErrorCounters* counters = (ServiceErrorCounters*)malloc(sizeof(ServiceErrorCounters));
-    counters = InitServiceErrorCounters(counters);
+    InitServiceErrorCounters(counters);
     for(int i = 0; i < TraceOk; i++) {
         EXPECT_EQ(counters->statusCounter[i], 0);
     }
@@ -31,7 +25,7 @@ TEST(Counters, InitServiceErrorCounters) {
 
 TEST(Counters, FreeServiceErrorCounters) {
     ServiceErrorCounters* counters = (ServiceErrorCounters*)malloc(sizeof(ServiceErrorCounters));
-    counters = initEmptyCounters();
+    InitServiceErrorCounters(counters);
     FreeServiceErrorCounters(counters);
 }
 
@@ -40,7 +34,7 @@ TEST(Spans, InitSpan) {
     char* spanId = (char*)"spanId";
     char* serviceName = (char*)"serviceName";
     Span* parentSpan = NULL;
-    span = InitSpan(span, spanId, serviceName, parentSpan);
+    InitSpan(span, spanId, serviceName, parentSpan);
 
     spanId = (char*)""; serviceName = (char*)"";
 
@@ -55,7 +49,7 @@ TEST(Spans, FreeSpan) {
     char* spanId = (char*)"spanId";
     char* serviceName = (char*)"serviceName";
     Span* parentSpan = NULL;
-    span = InitSpan(span, spanId, serviceName, parentSpan);
+    InitSpan(span, spanId, serviceName, parentSpan);
     FreeSpan(span);
 }
 
@@ -64,7 +58,7 @@ TEST(Traces, InitTrace) {
     char* traceString = (char*)"traceString";
     char* serviceName = (char*)"serviceName";
     char* traceId = (char*)"traceId";
-    trace = InitTrace(trace, traceString, serviceName, traceId);
+    InitTrace(trace, traceString, serviceName, traceId);
 
     traceString = (char*)""; serviceName = (char*)""; traceId = (char*)"";
 
@@ -79,14 +73,14 @@ TEST(Traces, FreeTrace) {
     char* traceString = (char*)"traceString";
     char* serviceName = (char*)"serviceName";
     char* traceId = (char*)"traceId";
-    trace = InitTrace(trace, traceString, serviceName, traceId);
+    InitTrace(trace, traceString, serviceName, traceId);
     FreeTrace(trace);
 }
 
 TEST(Service, InitService) {
     Service* service = (Service*)malloc(sizeof(Service));
     char* serviceName = (char*)"serviceName";
-    service = InitService(service, serviceName);
+    InitService(service, serviceName);
 
     serviceName = (char*)"";
 
@@ -97,7 +91,7 @@ TEST(Service, InitService) {
 TEST(Service, FreeService) {
     Service* service = (Service*)malloc(sizeof(Service));
     char* serviceName = (char*)"serviceName";
-    service = InitService(service, serviceName);
+    InitService(service, serviceName);
     FreeService(service);
 }
 
@@ -105,8 +99,8 @@ TEST(StringToService, InitStringToService) {
     struct StringToService* stringToService = (struct StringToService*)malloc(sizeof(struct StringToService));
     char* string = (char*)"string";
     Service* service = (Service*)malloc(sizeof(Service));
-    service = InitService(service, string);
-    stringToService = InitStringToService(stringToService, string, service);
+    InitService(service, string);
+    InitStringToService(stringToService, string, service);
 
     string = (char*)"";
 
@@ -118,8 +112,8 @@ TEST(StringToService, FreeStringToService) {
     struct StringToService* stringToService = (struct StringToService*)malloc(sizeof(struct StringToService));
     char* string = (char*)"string";
     Service* service = (Service*)malloc(sizeof(Service));
-    service = InitService(service, string);
-    stringToService = InitStringToService(stringToService, string, service);
+    InitService(service, string);
+    InitStringToService(stringToService, string, service);
     FreeStringToService(stringToService);
 }
 

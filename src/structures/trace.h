@@ -23,7 +23,7 @@ int CountSpans(char* trace);
 
 char* ScanTrace(const char *field, const char *trace);
 
-Trace* InitTrace(Trace* trace, char* traceString, char* serviceName, char* traceId);
+void InitTrace(Trace* trace, char* traceString, char* serviceName, char* traceId);
 
 Span** FindAllSpans(Trace* trace);
 

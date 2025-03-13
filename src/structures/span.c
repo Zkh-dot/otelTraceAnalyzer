@@ -9,7 +9,7 @@ const char* spanStatusMessage[TraceOk + 1] = {
     "SpanOk",
 };
 
-Span* InitSpan(Span* span, char* spanId, char* serviceName, Span* parentSpan) {
+void InitSpan(Span* span, char* spanId, char* serviceName, Span* parentSpan) {
     span->spanId = (char*)malloc(strlen(spanId) + 1);
     strcpy(span->spanId, spanId);
     span->serviceName = (char*)malloc(strlen(serviceName) + 1);
@@ -19,7 +19,6 @@ Span* InitSpan(Span* span, char* spanId, char* serviceName, Span* parentSpan) {
     if( parentSpan != NULL ) {
         parentSpan->parentSpan = span;
     }
-    return span;
 }
 
 void FreeSpan(Span* span) {
@@ -30,7 +29,7 @@ void FreeSpan(Span* span) {
 }
 
 Span* spancpy(Span* target, Span* source) {
-    target = InitSpan(target, source->spanId, source->serviceName, source->parentSpan);
+    InitSpan(target, source->spanId, source->serviceName, source->parentSpan);
     target->spanStatus = source->spanStatus;
     return target;
 }

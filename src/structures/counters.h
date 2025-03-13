@@ -41,7 +41,7 @@ typedef struct {
     int notmyExamplesCount;
 } ServiceErrorCounters;
 
-ServiceErrorCounters* InitServiceErrorCounters(ServiceErrorCounters* counters);
+void InitServiceErrorCounters(ServiceErrorCounters* counters);
 
 void FreeServiceErrorCounters(ServiceErrorCounters* counters);
 

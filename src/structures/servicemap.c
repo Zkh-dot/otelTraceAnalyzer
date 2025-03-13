@@ -11,10 +11,9 @@ uint64_t StringToServiceHash(const void *item, uint64_t seed0, uint64_t seed1) {
     return hashmap_sip(StringToInt->string, strlen(StringToInt->string), seed0, seed1);
 }
 
-struct StringToService* InitStringToService(struct StringToService* stringToService, char* string, Service* service) {
+void InitStringToService(struct StringToService* stringToService, char* string, Service* service) {
     stringToService->string = strdup(string);
     stringToService->service = service;
-    return stringToService;
 }
 
 struct hashmap* GetStringToServiceMap() {
@@ -25,7 +24,7 @@ struct hashmap* GetStringToServiceMap() {
 Service* AddNewService(struct hashmap* stringToServiceMap, char* serviceName) {
     struct StringToService stringToService;
     Service* service = (Service*)malloc(sizeof(Service));
-    service = InitService(service, serviceName);
+    InitService(service, serviceName);
     InitStringToService(&stringToService, serviceName, service);
     hashmap_set(stringToServiceMap, &stringToService);
     return service;

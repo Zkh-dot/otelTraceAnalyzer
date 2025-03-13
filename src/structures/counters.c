@@ -1,6 +1,6 @@
 #include "counters.h"
 
-ServiceErrorCounters* InitServiceErrorCounters(ServiceErrorCounters* counters) {
+void InitServiceErrorCounters(ServiceErrorCounters* counters) {
     for(int i = 0; i < TraceOk; i++) {
         counters->statusCounter[i] = 0;
     }
@@ -10,7 +10,6 @@ ServiceErrorCounters* InitServiceErrorCounters(ServiceErrorCounters* counters) {
     }
     counters->myExamplesCount = 0;
     counters->notmyExamplesCount = 0;
-    return counters;
 }
 
 void FreeServiceErrorCounters(ServiceErrorCounters* counters) {

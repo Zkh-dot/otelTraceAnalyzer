@@ -14,7 +14,7 @@ typedef struct Span_{
     SpanStatusTypes spanStatus;
 } Span;
 
-Span* InitSpan(Span* span, char* spanId, char* serviceName, Span* parentSpan);
+void InitSpan(Span* span, char* spanId, char* serviceName, Span* parentSpan);
 
 void FreeSpan(Span* span);
 
