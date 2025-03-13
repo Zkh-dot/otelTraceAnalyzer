@@ -53,6 +53,24 @@ TEST(Spans, FreeSpan) {
     FreeSpan(span);
 }
 
+TEST(Spans, FreeSpanTree) {
+    Span* span = (Span*)malloc(sizeof(Span));
+    char* spanId = (char*)"spanId";
+    char* serviceName = (char*)"serviceName";
+    Span* parentSpan = (Span*)malloc(sizeof(Span));
+    char* parentSpanId = (char*)"parentSpanId";
+    char* parentServiceName = (char*)"parentServiceName";
+    InitSpan(span, spanId, serviceName, parentSpan);
+    InitSpan(parentSpan, parentSpanId, parentServiceName, NULL);
+    EXPECT_EQ(strlen(span->spanId), strlen("spanId"));
+    EXPECT_EQ(strlen(span->serviceName), strlen("serviceName"));
+    EXPECT_EQ(span->spanStatus, UndefSpanStatus);
+    EXPECT_EQ(strlen(span->parentSpan->spanId), strlen("parentSpanId"));
+    EXPECT_EQ(strlen(span->parentSpan->serviceName), strlen("parentServiceName"));
+    EXPECT_EQ(span->parentSpan->spanStatus, UndefSpanStatus);
+    FreeSpanTree(span);
+}
+
 TEST(Traces, InitTrace) {
     Trace* trace = (Trace*)malloc(sizeof(Trace));
     char* traceString = (char*)"traceString";

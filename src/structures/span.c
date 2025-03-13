@@ -16,9 +16,6 @@ void InitSpan(Span* span, char* spanId, char* serviceName, Span* parentSpan) {
     strcpy(span->serviceName, serviceName);
     span->parentSpan = parentSpan;
     span->spanStatus = UndefSpanStatus;
-    if( parentSpan != NULL ) {
-        parentSpan->parentSpan = span;
-    }
 }
 
 void FreeSpan(Span* span) {
@@ -26,6 +23,13 @@ void FreeSpan(Span* span) {
     free(span->serviceName);
     // free(span->parentSpan);
     free(span);
+}
+
+void FreeSpanTree(Span* span) {
+    if (span->parentSpan != NULL) {
+        FreeSpanTree(span->parentSpan);
+    }
+    FreeSpan(span);
 }
 
 Span* spancpy(Span* target, Span* source) {

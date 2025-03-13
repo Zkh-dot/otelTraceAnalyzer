@@ -18,4 +18,6 @@ void InitSpan(Span* span, char* spanId, char* serviceName, Span* parentSpan);
 
 void FreeSpan(Span* span);
 
+void FreeSpanTree(Span* span);
+
 Span* spancpy(Span* target, Span* source);
