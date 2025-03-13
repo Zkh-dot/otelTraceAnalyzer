@@ -10,10 +10,8 @@ const char* spanStatusMessage[TraceOk + 1] = {
 };
 
 void InitSpan(Span* span, char* spanId, char* serviceName, Span* parentSpan) {
-    span->spanId = (char*)malloc(strlen(spanId) + 1);
-    strcpy(span->spanId, spanId);
-    span->serviceName = (char*)malloc(strlen(serviceName) + 1);
-    strcpy(span->serviceName, serviceName);
+    span->spanId = strdup(spanId);
+    span->serviceName = strdup(serviceName);
     span->parentSpan = parentSpan;
     span->spanStatus = UndefSpanStatus;
 }

@@ -23,6 +23,8 @@ Service* AddNewService(struct hashmap* stringToServiceMap, char* serviceName);
 
 void FreeStringToService(struct StringToService* stringToService);
 
+void FreeTempStringToService(struct StringToService* stringToService);
+
 void FreeStringToServiceMap(struct hashmap* stringToServiceMap);
 
 Service* FindService(struct hashmap* stringToServiceMap, char* serviceName);

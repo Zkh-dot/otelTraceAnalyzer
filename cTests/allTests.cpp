@@ -152,7 +152,6 @@ TEST(StringToService, FindAddedService) {
 
     EXPECT_EQ(strlen(foundService->serviceName), strlen("serviceName"));
     FreeStringToServiceMap(stringToServiceMap);
-    
 }
 
 int main() {

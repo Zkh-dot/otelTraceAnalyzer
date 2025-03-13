@@ -21,11 +21,12 @@ const char* traceStatusMessage[TraceOk + 1] = {
     "TraceOk",
 };
 
-char *LongStrTok(const char *input, const char *delimiter) {
+char *LongStrTok(char *input, const char *delimiter) {
     static char *string;
-    if (input != NULL)
+    if (input != NULL) {
         string = strdup(input);
-
+        free(input);
+    }
     if (string == NULL)
         return string;
 
@@ -108,9 +109,7 @@ Span** FindAllSpans(Trace* trace) {
     Span** spans = (Span**)malloc(SpansCount * sizeof(Span*));
     
     const char* Delimiter = "}, {";
-    // char *token = strtok(TraceCopy, Delimiter);
-    char *TraceCopy = strdup(trace->traceString);
-    char* token = LongStrTok(TraceCopy, Delimiter);
+    char* token = LongStrTok(trace->traceString, Delimiter);
     int i = 0;
     char *tmp;
     while (token != NULL && i < SpansCount) {
@@ -121,18 +120,14 @@ Span** FindAllSpans(Trace* trace) {
         i++;
         token = LongStrTok(NULL, Delimiter);
     }
-    free(TraceCopy);
     free(token);
     return spans;
 }
 
 void InitTrace(Trace* trace, char* traceString, char* serviceName, char* traceId) {
-    trace->traceString = (char*)malloc(strlen(traceString) + 1);
-    strcpy(trace->traceString, traceString);
-    trace->serviceName = (char*)malloc(strlen(serviceName) + 1);
-    strcpy(trace->serviceName, serviceName);
-    trace->traceId = (char*)malloc(strlen(traceId) + 1);
-    strcpy(trace->traceId, traceId);
+    trace->traceString = strdup(traceString);
+    trace->serviceName = strdup(serviceName);
+    trace->traceId = strdup(traceId);
     trace->spanIds = hashset_create();
 }
 
@@ -140,7 +135,6 @@ void FreeTrace(Trace* trace) {
     free(trace->traceString);
     free(trace->serviceName);
     free(trace->traceId);
-    hashset_itr_t itr = hashset_iterator(trace->spanIds);
     hashset_destroy(trace->spanIds);
     free(trace);
 }

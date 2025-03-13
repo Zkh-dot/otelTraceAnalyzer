@@ -17,7 +17,7 @@ typedef struct {
     hashset_t spanIds;
 } Trace;
 
-char *LongStrTok(const char *input, const char *delimiter);
+char *LongStrTok(char *input, const char *delimiter);
 
 int CountSpans(char* trace);
 

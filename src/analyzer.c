@@ -12,6 +12,5 @@ int main() {
     Service* foundService = FindService(stringToServiceMap, serviceName);
 
     FreeStringToServiceMap(stringToServiceMap);
-        
     return 0;
 }

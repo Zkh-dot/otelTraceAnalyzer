@@ -35,6 +35,11 @@ void FreeStringToService(struct StringToService* stringToService) {
     FreeService(stringToService->service);
 }
 
+void FreeTempStringToService(struct StringToService* stringToService) {
+    free(stringToService->string);
+    free(stringToService);
+}
+
 void FreeStringToServiceMap(struct hashmap* stringToServiceMap) {
     size_t iter = 0;
     void *item;
@@ -45,8 +50,9 @@ void FreeStringToServiceMap(struct hashmap* stringToServiceMap) {
 }
 
 Service* FindService(struct hashmap* stringToServiceMap, char* serviceName) {
-    struct StringToService stringToService;
-    InitStringToService(&stringToService, serviceName, NULL);
-    Service* foundService = ((const struct StringToService*)hashmap_get(stringToServiceMap, &stringToService)) -> service;
+    struct StringToService* stringToService = (struct StringToService*)malloc(sizeof(struct StringToService));
+    InitStringToService(stringToService, serviceName, NULL);
+    Service* foundService = ((const struct StringToService*)hashmap_get(stringToServiceMap, stringToService)) -> service;
+    FreeTempStringToService(stringToService);
     return foundService;
 }
