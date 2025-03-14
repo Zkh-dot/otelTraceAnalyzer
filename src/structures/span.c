@@ -9,7 +9,13 @@ const char* spanStatusMessage[TraceOk + 1] = {
     "SpanOk",
 };
 
-void InitSpan(Span* span, char* spanId, char* serviceName, char* parentSpanId, Span* parentSpan) {
+void InitSpan(
+        Span* span,
+        const char* spanId,
+        const char* serviceName,
+        const char* parentSpanId,
+        Span* parentSpan
+    ) {
     span->spanId = strdup(spanId);
     span->serviceName = strdup(serviceName);
     if(parentSpanId != NULL)
@@ -48,7 +54,7 @@ Span* spancpy(Span* target, Span* source) {
     return target;
 }
 
-Span* FindSpan(Span** spans, int count, char* spanId) {
+Span* FindSpan(Span** spans, int count, const char* spanId) {
     for (int i = 0; i < count; i++) {
         if (strcmp(spans[i]->spanId, spanId) == 0) {
             return spans[i];

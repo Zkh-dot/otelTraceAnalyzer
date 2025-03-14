@@ -17,12 +17,17 @@ void FreeAnalyzer(Analyzer* analyzer);
 
 void AddTrace(Analyzer* analyzer, Trace* trace);
 
-Service* GetAddService(Analyzer* analyzer, char* serviceName);
+Service* GetAddService(Analyzer* analyzer, const char* serviceName);
 
 void AnalyzeTrace(Analyzer* analyzer, Trace* trace);
 
-void APIAnalyzeTrace(Analyzer* analyzer, char* traceString, char* serviceName, char* traceId);
+void APIAnalyzeTrace(
+    Analyzer* analyzer,
+    const char* traceString,
+    const char* serviceName,
+    const char* traceId
+);
 
-ServiceErrorCounters* APIGetServiceErrorCounters(Analyzer* analyzer, char* serviceName);
+ServiceErrorCounters* APIGetServiceErrorCounters(Analyzer* analyzer, const char* serviceName);
 
 CountersArr* APIGetAllServiceErrorCounters(Analyzer* analyzer);

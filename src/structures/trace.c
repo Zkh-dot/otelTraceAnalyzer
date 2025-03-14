@@ -41,7 +41,7 @@ char *LongStrTok(char *input, const char *delimiter) {
     return string;
 }
 
-int CountSpans(char* trace) {
+int CountSpans(const char* trace) {
     int count = 0;
     const char *spanId_key = "'spanId': '";
     char *trace_copy = strdup(trace);
@@ -132,7 +132,12 @@ void FindAllSpans(Trace* trace) {
     trace->traceString = NULL;
 }
 
-void InitTrace(Trace* trace, char* traceString, char* serviceName, char* traceId) {
+void InitTrace(
+        Trace* trace,
+        const char* traceString,
+        const char* serviceName,
+        const char* traceId
+    ) {
     trace->traceString = strdup(traceString);
     trace->serviceName = strdup(serviceName);
     trace->traceId = strdup(traceId);

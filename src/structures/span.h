@@ -18,9 +18,9 @@ typedef struct Span_{
 
 void InitSpan(
     Span* span,
-    char* spanId,
-    char* serviceName,
-    char* parentSpanId,
+    const char* spanId,
+    const char* serviceName,
+    const char* parentSpanId,
     Span* parentSpan
 );
 
@@ -32,7 +32,7 @@ Span* spancpy(Span* target, Span* source);
 
 void FreeAllSpans(Span** spans, int count);
 
-Span* FindSpan(Span** spans, int count, char* spanId);
+Span* FindSpan(Span** spans, int count, const char* spanId);
 
 void BuildSpanTree(Span** spans, int count);
 

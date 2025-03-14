@@ -21,11 +21,15 @@ typedef struct {
 
 char *LongStrTok(char *input, const char *delimiter);
 
-int CountSpans(char* trace);
+int CountSpans(const char* trace);
 
 char* ScanTrace(const char *field, const char *trace);
 
-void InitTrace(Trace* trace, char* traceString, char* serviceName, char* traceId);
+void InitTrace(Trace* trace,
+    const char* traceString,
+    const char* serviceName,
+    const char* traceId
+);
 
 void FindAllSpans(Trace* trace);
 

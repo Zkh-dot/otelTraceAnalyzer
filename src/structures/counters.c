@@ -19,16 +19,10 @@ void FreeServiceErrorCounters(ServiceErrorCounters* counters) {
     free(counters);
 }
 
-void sumCounters(ServiceErrorCounters* errorCounters, ServiceErrorCounters* errorCounters2) {
+void sumCounters(ServiceErrorCounters* dst, ServiceErrorCounters* src) {
     for(int i = 0; i < TraceOk; i++) {
-        errorCounters->statusCounter[i] += errorCounters2->statusCounter[i];
+        dst->statusCounter[i] += src->statusCounter[i];
     }
-    // for(int i = 0; i < EXAMPLES_LENGTH; i++) {
-    //     if(i < errorCounters2->myExamplesCount)
-    //         AppendExample(errorCounters, errorCounters2->myBadTraceExamples[i], 1);
-    //     if(i < errorCounters2)
-    //         AppendExample(errorCounters, errorCounters2->notmyBadTraceExamples[i], 0);
-    // }
 }
 
 void IncCounters(ServiceErrorCounters* errorCounters, SpanStatusTypes status, bool isMy) {

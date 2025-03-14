@@ -9,6 +9,6 @@ typedef struct {
     Trace** traces;
 } Service;
 
-void InitService(Service* service, char* serviceName);
+void InitService(Service* service, const char* serviceName);
 
 void FreeService(Service* service);

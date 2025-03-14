@@ -54,7 +54,7 @@ void InitServiceErrorCounters(ServiceErrorCounters* counters);
 
 void FreeServiceErrorCounters(ServiceErrorCounters* counters);
 
-void sumCounters(ServiceErrorCounters* errorCounters, ServiceErrorCounters* errorCounters2);
+void sumCounters(ServiceErrorCounters* dst, ServiceErrorCounters* src);
 
 void IncCounters(ServiceErrorCounters* errorCounters, SpanStatusTypes status, bool isMy);
 
@@ -65,5 +65,3 @@ void AppendExample(ServiceErrorCounters* errorCounters, char* traceId, bool isMy
 bool IsRootSpanError(ServiceErrorCounters* errorCounters);
 
 void FreeCountersArr(CountersArr* countersArr);
-
-void InitCountersArr(CountersArr* countersArr, int size);

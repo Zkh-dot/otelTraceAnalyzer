@@ -18,7 +18,7 @@ void AddTrace(Analyzer* analyzer, Trace* trace) {
     free(stringToTrace);
 }
 
-Service* GetAddService(Analyzer* analyzer, char* serviceName) {
+Service* GetAddService(Analyzer* analyzer, const char* serviceName) {
     Service* tmpService = FindService(analyzer->serviceMap, serviceName);
     if(tmpService == NULL) {
         tmpService = AddNewService(analyzer->serviceMap, serviceName);
@@ -72,13 +72,18 @@ void AnalyzeTrace(Analyzer* analyzer, Trace* trace) {
     free(tmpCounters);
 }
 
-void APIAnalyzeTrace(Analyzer* analyzer, char* traceString, char* serviceName, char* traceId) {
+void APIAnalyzeTrace(
+        Analyzer* analyzer,
+        const char* traceString,
+        const char* serviceName,
+        const char* traceId
+    ) {
     Trace* trace = (Trace*)malloc(sizeof(Trace));
     InitTrace(trace, traceString, serviceName, traceId);
     AnalyzeTrace(analyzer, trace);
 }
 
-ServiceErrorCounters* APIGetServiceErrorCounters(Analyzer* analyzer, char* serviceName) {
+ServiceErrorCounters* APIGetServiceErrorCounters(Analyzer* analyzer, const char* serviceName) {
     Service* service = FindService(analyzer->serviceMap, serviceName);
     ServiceErrorCounters* counters = service->errorCounters;
     return counters;
@@ -98,7 +103,5 @@ CountersArr* APIGetAllServiceErrorCounters(Analyzer* analyzer) {
     }
     arr->errorCounters = counters;
     arr->errorCountersCount = counter;
-    // free((struct StringToService*)item);
-    // free(e);
     return arr;
 }

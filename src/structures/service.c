@@ -1,6 +1,6 @@
 #include "service.h"
 
-void InitService(Service* service, char* serviceName) {
+void InitService(Service* service, const char* serviceName) {
     service->serviceName = strdup(serviceName);
     service->errorCounters = (ServiceErrorCounters*)malloc(sizeof(ServiceErrorCounters));
     InitServiceErrorCounters(service->errorCounters);

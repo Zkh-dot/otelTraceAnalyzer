@@ -11,12 +11,12 @@ uint64_t StringToStructHash(const void *item, uint64_t seed0, uint64_t seed1) {
     return hashmap_sip(StringToInt->string, strlen(StringToInt->string), seed0, seed1);
 }
 
-void InitStringToService(struct StringToService* stringToService, char* string, Service* service) {
+void InitStringToService(struct StringToService* stringToService, const char* string, Service* service) {
     stringToService->string = strdup(string);
     stringToService->service = service;
 }
 
-void InitStringToTrace(struct StringToTrace* stringToTrace, char* string, Trace* trace) {
+void InitStringToTrace(struct StringToTrace* stringToTrace, const char* string, Trace* trace) {
     stringToTrace->string = strdup(string);
     stringToTrace->trace = trace;
 }
@@ -31,7 +31,7 @@ struct hashmap* GetStringToTraceMap() {
         StringToStructHash, StringToStructCompare, NULL, NULL);
 }
 
-Service* AddNewService(struct hashmap* stringToServiceMap, char* serviceName) {
+Service* AddNewService(struct hashmap* stringToServiceMap, const char* serviceName) {
     struct StringToService stringToService;
     Service* service = (Service*)malloc(sizeof(Service));
     InitService(service, serviceName);
@@ -78,7 +78,7 @@ void FreeStringToTraceMap(struct hashmap* stringToTraceMap) {
     hashmap_free(stringToTraceMap);
 }
 
-Service* FindService(struct hashmap* stringToServiceMap, char* serviceName) {
+Service* FindService(struct hashmap* stringToServiceMap, const char* serviceName) {
     struct StringToService* searchStringToService = (struct StringToService*)malloc(sizeof(struct StringToService));
     Service* foundService = NULL;
     InitStringToService(searchStringToService, serviceName, NULL);
@@ -90,7 +90,7 @@ Service* FindService(struct hashmap* stringToServiceMap, char* serviceName) {
     return foundService;
 }
 
-Trace* FindTrace(struct hashmap* stringToTraceMap, char* traceId) {
+Trace* FindTrace(struct hashmap* stringToTraceMap, const char* traceId) {
     struct StringToTrace* stringToTrace = (struct StringToTrace*)malloc(sizeof(struct StringToTrace));
     InitStringToTrace(stringToTrace, traceId, NULL);
     Trace* foundTrace = ((const struct StringToTrace*)hashmap_get(stringToTraceMap, stringToTrace)) -> trace;
