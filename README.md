@@ -45,4 +45,19 @@ $ python3 test_lib.py
     "traceCount": 1
 }
 <class 'dict'>
+
+```
+```
+$ valgrind --tool=memcheck --leak-check=full python3 test_lib.py 
+
+==374573== HEAP SUMMARY:
+==374573==     in use at exit: 397,058 bytes in 11 blocks
+==374573==   total heap usage: 3,462 allocs, 3,451 frees, 4,881,009 bytes allocated
+==374573== 
+==374573== LEAK SUMMARY:
+==374573==    definitely lost: 0 bytes in 0 blocks
+==374573==    indirectly lost: 0 bytes in 0 blocks
+==374573==      possibly lost: 0 bytes in 0 blocks
+==374573==    still reachable: 397,058 bytes in 11 blocks
+==374573==         suppressed: 0 bytes in 0 blocks
 ```
