@@ -1,4 +1,4 @@
-from libanalyzer import Analyzer
+from analyzer import Analyzer
 import json
 def test():
     a = Analyzer()

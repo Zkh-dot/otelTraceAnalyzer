@@ -76,3 +76,7 @@ build/*
 *vgcore*
 CTestTestfile.cmake
 .vscode/*
+
+*temp*
+
+*/__pycache__/*

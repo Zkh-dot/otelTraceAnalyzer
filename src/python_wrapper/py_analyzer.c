@@ -74,7 +74,7 @@ PyObject* PyAPIGetAllServiceErrorCounters(PyAnalyzer* self) {
     return dict;
 }
 
-// PyMODINIT_FUNC PyInit_libanalyzer(void) {
+// PyMODINIT_FUNC PyInit_otelanalyzer(void) {
 //     PyObject* m;
 //     if (PyType_Ready(&PyAnalyzerType) < 0) {
 //         return NULL;
@@ -91,7 +91,7 @@ PyObject* PyAPIGetAllServiceErrorCounters(PyAnalyzer* self) {
 //     PyModule_AddObject(m, "Analyzer", (PyObject*)&PyAnalyzerType);
 // }
 
-PyMODINIT_FUNC PyInit_libanalyzer(void) {
+PyMODINIT_FUNC PyInit_otelanalyzer(void) {
     PyObject* m;
     PyObject* type_obj = (PyObject*)&PyAnalyzerType;
 
@@ -100,10 +100,10 @@ PyMODINIT_FUNC PyInit_libanalyzer(void) {
         return NULL;
     }
 
-    // Module definition must match the function name "libanalyzer"
+    // Module definition must match the function name "otelanalyzer"
     static struct PyModuleDef moduledef = {
         PyModuleDef_HEAD_INIT,
-        "libanalyzer",  // Module name must match PyInit_libanalyzer
+        "otelanalyzer",  // Module name must match PyInit_otelanalyzer
         "module to analyze traces on OpenTelemetry format",
         -1,
         NULL,

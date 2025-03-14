@@ -66,7 +66,6 @@ char* ScanTrace(const char *field, const char *trace) {
     }
 
     const char *key_prefix = "': '";
-    const char *key_suffix = "'";
     const char *value_suffix = "'";
 
     char search_key[256];
@@ -109,7 +108,6 @@ void FindAllSpans(Trace* trace) {
     char* tempCopy = strdup(trace->traceString);
     char* token = LongStrTok(tempCopy, Delimiter);
     int i = 0;
-    char *tmp;
     while (token != NULL && i < trace->spansCount) {
         char* spanId = ScanTrace(SPAN_ID_KEY, token);
         char* serviceName = ScanTrace(SERVICE_NAME_KEY, token);

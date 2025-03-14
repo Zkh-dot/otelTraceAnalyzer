@@ -196,10 +196,3 @@ static PyTypeObject PyServiceType = {
     .tp_dealloc = (destructor)PyService_dealloc,
     .tp_methods = PyService_methods,
 };
-
-// static PyModuleDef pywrapper_module = {
-//     PyModuleDef_HEAD_INIT,
-//     .m_name = "pywrapper",
-//     .m_doc = "Python wrapper for C structures",
-//     .m_size = -1,
-// };
