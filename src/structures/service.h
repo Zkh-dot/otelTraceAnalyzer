@@ -5,7 +5,8 @@
 
 typedef struct {
     char* serviceName;
-    ServiceErrorCounters* errorCounters;    
+    ServiceErrorCounters* errorCounters;
+    Trace** traces;
 } Service;
 
 void InitService(Service* service, char* serviceName);

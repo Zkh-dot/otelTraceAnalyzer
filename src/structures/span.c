@@ -9,9 +9,13 @@ const char* spanStatusMessage[TraceOk + 1] = {
     "SpanOk",
 };
 
-void InitSpan(Span* span, char* spanId, char* serviceName, Span* parentSpan) {
+void InitSpan(Span* span, char* spanId, char* serviceName, char* parentSpanId, Span* parentSpan) {
     span->spanId = strdup(spanId);
     span->serviceName = strdup(serviceName);
+    if(parentSpanId != NULL)
+        span->parentSpanId = strdup(parentSpanId);
+    else
+        span->parentSpanId = NULL;
     span->parentSpan = parentSpan;
     span->spanStatus = UndefSpanStatus;
 }
@@ -19,6 +23,8 @@ void InitSpan(Span* span, char* spanId, char* serviceName, Span* parentSpan) {
 void FreeSpan(Span* span) {
     free(span->spanId);
     free(span->serviceName);
+    if(span->parentSpanId != NULL)
+        free(span->parentSpanId);
     free(span);
 }
 
@@ -37,7 +43,43 @@ void FreeAllSpans(Span** spans, int count) {
 }
 
 Span* spancpy(Span* target, Span* source) {
-    InitSpan(target, source->spanId, source->serviceName, source->parentSpan);
+    InitSpan(target, source->spanId, source->serviceName, source->parentSpanId, source->parentSpan);
     target->spanStatus = source->spanStatus;
     return target;
+}
+
+Span* FindSpan(Span** spans, int count, char* spanId) {
+    for (int i = 0; i < count; i++) {
+        if (strcmp(spans[i]->spanId, spanId) == 0) {
+            return spans[i];
+        }
+    }
+    return NULL;
+}
+
+// not tested
+void BuildSpanTree(Span** spans, int count) {
+    Span* root = NULL;
+    for (int i = 0; i < count; i++) {
+        if (spans[i]->parentSpanId == NULL) {
+            root = spans[i];
+        } else {
+            Span* parentSpan = FindSpan(spans, count, spans[i]->parentSpanId);
+            if (parentSpan != NULL) {
+                spans[i]->parentSpan = parentSpan;
+            } else {
+                spans[i]->spanStatus = NoParentInTrace;
+            }
+        }
+    }
+}
+
+// not tested
+int SpanTreeLength(Span* span) {
+    int length = 0;
+    while (span != NULL) {
+        length++;
+        span = span->parentSpan;
+    }
+    return length;
 }

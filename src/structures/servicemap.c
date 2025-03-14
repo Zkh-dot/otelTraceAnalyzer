@@ -1,12 +1,12 @@
 #include "servicemap.h"
 
-int StringToServiceCompare(const void *a, const void *b, void *udata) {
+int StringToStructCompare(const void *a, const void *b, void *udata) {
     const struct StringToService *ua = a;
     const struct StringToService *ub = b;
     return strcmp(ua->string, ub->string);
 };
 
-uint64_t StringToServiceHash(const void *item, uint64_t seed0, uint64_t seed1) {
+uint64_t StringToStructHash(const void *item, uint64_t seed0, uint64_t seed1) {
     const struct StringToService *StringToInt = item;
     return hashmap_sip(StringToInt->string, strlen(StringToInt->string), seed0, seed1);
 }
@@ -16,9 +16,19 @@ void InitStringToService(struct StringToService* stringToService, char* string, 
     stringToService->service = service;
 }
 
+void InitStringToTrace(struct StringToTrace* stringToTrace, char* string, Trace* trace) {
+    stringToTrace->string = strdup(string);
+    stringToTrace->trace = trace;
+}
+
 struct hashmap* GetStringToServiceMap() {
     return hashmap_new(sizeof(struct StringToService), 0, 0, 0, 
-        StringToServiceHash, StringToServiceCompare, NULL, NULL);
+        StringToStructHash, StringToStructCompare, NULL, NULL);
+}
+
+struct hashmap* GetStringToTraceMap() {
+    return hashmap_new(sizeof(struct StringToTrace), 0, 0, 0, 
+        StringToStructHash, StringToStructCompare, NULL, NULL);
 }
 
 Service* AddNewService(struct hashmap* stringToServiceMap, char* serviceName) {
@@ -35,9 +45,19 @@ void FreeStringToService(struct StringToService* stringToService) {
     FreeService(stringToService->service);
 }
 
+void FreeStringToTrace(struct StringToTrace* stringToTrace) {
+    free(stringToTrace->string);
+    FreeTrace(stringToTrace->trace);
+}
+
 void FreeTempStringToService(struct StringToService* stringToService) {
     free(stringToService->string);
     free(stringToService);
+}
+
+void FreeTempStringToTrace(struct StringToTrace* stringToTrace) {
+    free(stringToTrace->string);
+    free(stringToTrace);
 }
 
 void FreeStringToServiceMap(struct hashmap* stringToServiceMap) {
@@ -49,10 +69,27 @@ void FreeStringToServiceMap(struct hashmap* stringToServiceMap) {
     hashmap_free(stringToServiceMap);
 }
 
+void FreeStringToTraceMap(struct hashmap* stringToTraceMap) {
+    size_t iter = 0;
+    void *item;
+    while (hashmap_iter(stringToTraceMap, &iter, &item))  {
+        FreeStringToTrace((struct StringToTrace*)item);
+    }
+    hashmap_free(stringToTraceMap);
+}
+
 Service* FindService(struct hashmap* stringToServiceMap, char* serviceName) {
     struct StringToService* stringToService = (struct StringToService*)malloc(sizeof(struct StringToService));
     InitStringToService(stringToService, serviceName, NULL);
     Service* foundService = ((const struct StringToService*)hashmap_get(stringToServiceMap, stringToService)) -> service;
     FreeTempStringToService(stringToService);
     return foundService;
+}
+
+Trace* FindTrace(struct hashmap* stringToTraceMap, char* traceId) {
+    struct StringToTrace* stringToTrace = (struct StringToTrace*)malloc(sizeof(struct StringToTrace));
+    InitStringToTrace(stringToTrace, traceId, NULL);
+    Trace* foundTrace = ((const struct StringToTrace*)hashmap_get(stringToTraceMap, stringToTrace)) -> trace;
+    FreeTempStringToTrace(stringToTrace);
+    return foundTrace;
 }

@@ -10,6 +10,9 @@ void InitServiceErrorCounters(ServiceErrorCounters* counters) {
     }
     counters->myExamplesCount = 0;
     counters->notmyExamplesCount = 0;
+    counters->badTraceCount = 0;
+    counters->mySpanCount = 0;
+    counters->traceCount = 0;
 }
 
 void FreeServiceErrorCounters(ServiceErrorCounters* counters) {
@@ -26,7 +29,7 @@ void sumCounters(ServiceErrorCounters* errorCounters, ServiceErrorCounters* erro
     }
 }
 
-void IncCounters(ServiceErrorCounters* errorCounters, SpanStatusTypes status, char* traceId, bool isMy) {
+void IncCounters(ServiceErrorCounters* errorCounters, SpanStatusTypes status, bool isMy) {
     switch (status)
     {
     case MissingParent:
@@ -48,7 +51,7 @@ void IncCounters(ServiceErrorCounters* errorCounters, SpanStatusTypes status, ch
     }
 }
 
-void DecCounters(ServiceErrorCounters* errorCounters, SpanStatusTypes status, char* traceId, bool isMy) {
+void DecCounters(ServiceErrorCounters* errorCounters, SpanStatusTypes status, bool isMy) {
     switch (status)
     {
     case MissingParent:
@@ -90,4 +93,11 @@ bool IsRootSpanError(ServiceErrorCounters* errorCounters) {
         changed += errorCounters->statusCounter[i];
     }
     return (changed == 1) && errorCounters->statusCounter[myMissingParent] == 1;
+}
+
+void FreeCountersArr(CountersArr* countersArr) {
+    for(int i = 0; i < countersArr->errorCountersCount; i++) {
+        FreeServiceErrorCounters(countersArr->errorCounters[i]);
+    }
+    free(countersArr);
 }

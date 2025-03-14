@@ -101,9 +101,9 @@ char* ScanTrace(const char *field, const char *trace) {
     return value;
 }
 
-Span** FindAllSpans(Trace* trace) {
+void FindAllSpans(Trace* trace) {
     trace->spansCount = CountSpans(trace->traceString);
-    Span** spans = (Span**)malloc(trace->spansCount * sizeof(Span*));
+    trace->spans = (Span**)malloc(trace->spansCount * sizeof(Span*));
     
     const char* Delimiter = "}, {";
     char* tempCopy = strdup(trace->traceString);
@@ -111,24 +111,25 @@ Span** FindAllSpans(Trace* trace) {
     int i = 0;
     char *tmp;
     while (token != NULL && i < trace->spansCount) {
-        char* spanId = ScanTrace("spanId", token);
-        char* serviceName = ScanTrace("serviceName", token);
+        char* spanId = ScanTrace(SPAN_ID_KEY, token);
+        char* serviceName = ScanTrace(SERVICE_NAME_KEY, token);
+        char* spanParentId = ScanTrace(PARENT_SPAN_ID_KEY, token);
         Span* span = (Span*)malloc(sizeof(Span));
-        InitSpan(span, spanId, serviceName, NULL);
-        spans[i] = span;
-        hashset_add(trace->spanIds, spans[i]->spanId);
+        InitSpan(span, spanId, serviceName, spanParentId, NULL);
+        trace->spans[i] = span;
+        hashset_add(trace->spanIds, trace->spans[i]->spanId);
         i++;
         free(token);
         token = LongStrTok(NULL, Delimiter);
         free(spanId);
         free(serviceName);
+        free(spanParentId);
     }
     free(token);
     free(tempCopy);
     // optional, but may be good for optimization
     free(trace->traceString);
     trace->traceString = NULL;
-    return spans;
 }
 
 void InitTrace(Trace* trace, char* traceString, char* serviceName, char* traceId) {
@@ -141,6 +142,8 @@ void InitTrace(Trace* trace, char* traceString, char* serviceName, char* traceId
 void FreeTrace(Trace* trace) {
     if(trace->traceString != NULL)
         free(trace->traceString);
+    if(trace->spans != NULL)
+        FreeAllSpans(trace->spans, trace->spansCount);
     free(trace->serviceName);
     free(trace->traceId);
     hashset_destroy(trace->spanIds);

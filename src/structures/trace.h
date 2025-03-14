@@ -16,6 +16,7 @@ typedef struct {
     char* traceId;
     int spansCount;
     hashset_t spanIds;
+    Span** spans;
 } Trace;
 
 char *LongStrTok(char *input, const char *delimiter);
@@ -26,6 +27,6 @@ char* ScanTrace(const char *field, const char *trace);
 
 void InitTrace(Trace* trace, char* traceString, char* serviceName, char* traceId);
 
-Span** FindAllSpans(Trace* trace);
+void FindAllSpans(Trace* trace);
 
 void FreeTrace(Trace* trace);
