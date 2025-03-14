@@ -18,9 +18,11 @@ set(LIB_FILES
 
 set(CMAKE_BUILD_TYPE Debug) 
 
-# add_executable(analyzerV1 ${LIB_FILES} src/analyzer.c)
+# python .so build
 
-# set_property(TARGET analyzerV1 PROPERTY C_STANDARD 23)
+find_package(Python3 COMPONENTS Development REQUIRED)
+
+Python3_add_library(analyzer SHARED ${LIB_FILES} src/python_wrapper/py_analyzer.c)
 
 # mem test
 

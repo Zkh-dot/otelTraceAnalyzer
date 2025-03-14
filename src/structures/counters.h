@@ -38,6 +38,7 @@ typedef struct {
     int statusCounter[TraceOk + 1];
     char* myBadTraceExamples[EXAMPLES_LENGTH];
     char* notmyBadTraceExamples[EXAMPLES_LENGTH];
+    const char* serviceName;
     int myExamplesCount;
     int notmyExamplesCount;
     int badTraceCount;
@@ -48,6 +49,7 @@ typedef struct {
 typedef struct {
     ServiceErrorCounters** errorCounters;
     int errorCountersCount;
+    char* serviceName;
 } CountersArr;
 
 void InitServiceErrorCounters(ServiceErrorCounters* counters);

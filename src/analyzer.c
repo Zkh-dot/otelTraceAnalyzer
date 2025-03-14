@@ -99,6 +99,7 @@ CountersArr* APIGetAllServiceErrorCounters(Analyzer* analyzer) {
     while((hashmap_iter(analyzer->serviceMap, &iter, &item))) {
         e = (struct StringToService*)item;
         counters[counter] = e->service->errorCounters;
+        counters[counter]->serviceName = e->string;
         counter++;
     }
     arr->errorCounters = counters;
