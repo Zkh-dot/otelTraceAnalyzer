@@ -5,12 +5,13 @@
 #include "structures/servicemap.h"
 
 int main() {
-    struct hashmap* stringToServiceMap = GetStringToServiceMap();
+    Trace* trace = (Trace*)malloc(sizeof(Trace));
+    char* traceString = (char*)"[{'spanId': '0000000000000000', 'serviceName': 'some-name', 'parentSpanId': '0000000000000000', 'traceId': '00000000000000000000000000000000', 'project': 'some-project', 'service': 'some-service'}]";
     char* serviceName = (char*)"serviceName";
-    Service* service = AddNewService(stringToServiceMap, serviceName);
-    
-    Service* foundService = FindService(stringToServiceMap, serviceName);
-
-    FreeStringToServiceMap(stringToServiceMap);
+    char* traceId = (char*)"traceId";
+    InitTrace(trace, traceString, serviceName, traceId);
+    Span** spans = FindAllSpans(trace);
+    FreeAllSpans(spans, trace->spansCount);
+    FreeTrace(trace);
     return 0;
 }

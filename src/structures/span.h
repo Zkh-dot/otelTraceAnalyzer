@@ -21,3 +21,5 @@ void FreeSpan(Span* span);
 void FreeSpanTree(Span* span);
 
 Span* spancpy(Span* target, Span* source);
+
+void FreeAllSpans(Span** spans, int count);

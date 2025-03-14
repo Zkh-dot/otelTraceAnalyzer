@@ -25,7 +25,6 @@ char *LongStrTok(char *input, const char *delimiter) {
     static char *string;
     if (input != NULL) {
         string = strdup(input);
-        free(input);
     }
     if (string == NULL)
         return string;
@@ -37,11 +36,9 @@ char *LongStrTok(char *input, const char *delimiter) {
         return temp;
     }
 
-    char *temp = string;
-
     *end = '\0';
     string = end + strlen(delimiter);
-    return temp;
+    return string;
 }
 
 int CountSpans(char* trace) {
@@ -105,22 +102,29 @@ char* ScanTrace(const char *field, const char *trace) {
 }
 
 Span** FindAllSpans(Trace* trace) {
-    int SpansCount = CountSpans(trace->traceString);
-    Span** spans = (Span**)malloc(SpansCount * sizeof(Span*));
+    trace->spansCount = CountSpans(trace->traceString);
+    Span** spans = (Span**)malloc(trace->spansCount * sizeof(Span*));
     
     const char* Delimiter = "}, {";
-    char* token = LongStrTok(trace->traceString, Delimiter);
+    char* tempCopy = strdup(trace->traceString);
+    char* token = LongStrTok(tempCopy, Delimiter);
     int i = 0;
     char *tmp;
-    while (token != NULL && i < SpansCount) {
+    while (token != NULL && i < trace->spansCount) {
         char* spanId = ScanTrace("spanId", token);
         char* serviceName = ScanTrace("serviceName", token);
-        InitSpan(spans[i], spanId, serviceName, NULL);
+        Span* span = (Span*)malloc(sizeof(Span));
+        InitSpan(span, spanId, serviceName, NULL);
+        spans[i] = span;
         hashset_add(trace->spanIds, spans[i]->spanId);
         i++;
+        free(token);
         token = LongStrTok(NULL, Delimiter);
+        free(spanId);
+        free(serviceName);
     }
     free(token);
+    free(tempCopy);
     return spans;
 }
 

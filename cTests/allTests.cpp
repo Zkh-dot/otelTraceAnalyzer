@@ -95,6 +95,23 @@ TEST(Traces, FreeTrace) {
     FreeTrace(trace);
 }
 
+TEST(Traces, ScanTrace) {
+    const char* traceString = (char*)"{'traceId': 'traceId', 'serviceName': 'serviceName', 'spans':[{'spanId': 'spanId', 'serviceName': 'serviceName'}]}";
+    char* serviceName = ScanTrace("serviceName", traceString);
+    EXPECT_EQ(strlen(serviceName), strlen("serviceName"));
+}
+
+TEST(Traces, FindAllSpans) {
+    Trace* trace = (Trace*)malloc(sizeof(Trace));
+    char* traceString = (char*)"[{'spanId': '0000000000000000', 'serviceName': 'some-name', 'parentSpanId': '0000000000000000', 'traceId': '00000000000000000000000000000000', 'project': 'some-project', 'service': 'some-service'}]";
+    char* serviceName = (char*)"serviceName";
+    char* traceId = (char*)"traceId";
+    InitTrace(trace, traceString, serviceName, traceId);
+    Span** spans = FindAllSpans(trace);
+    EXPECT_EQ(strlen(spans[0]->spanId), 16);
+    FreeTrace(trace);
+}
+
 TEST(Service, InitService) {
     Service* service = (Service*)malloc(sizeof(Service));
     char* serviceName = (char*)"serviceName";

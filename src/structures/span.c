@@ -19,7 +19,6 @@ void InitSpan(Span* span, char* spanId, char* serviceName, Span* parentSpan) {
 void FreeSpan(Span* span) {
     free(span->spanId);
     free(span->serviceName);
-    // free(span->parentSpan);
     free(span);
 }
 
@@ -28,6 +27,13 @@ void FreeSpanTree(Span* span) {
         FreeSpanTree(span->parentSpan);
     }
     FreeSpan(span);
+}
+
+void FreeAllSpans(Span** spans, int count) {
+    for (int i = 0; i < count; i++) {
+        FreeSpan(spans[i]);
+    }
+    free(spans);
 }
 
 Span* spancpy(Span* target, Span* source) {
