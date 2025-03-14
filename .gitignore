@@ -71,3 +71,8 @@ Testing/*
 
 #build
 build/*
+
+#junk
+*vgcore*
+CTestTestfile.cmake
+# .vscode/*
