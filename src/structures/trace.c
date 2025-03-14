@@ -125,6 +125,9 @@ Span** FindAllSpans(Trace* trace) {
     }
     free(token);
     free(tempCopy);
+    // optional, but may be good for optimization
+    free(trace->traceString);
+    trace->traceString = NULL;
     return spans;
 }
 
@@ -136,7 +139,8 @@ void InitTrace(Trace* trace, char* traceString, char* serviceName, char* traceId
 }
 
 void FreeTrace(Trace* trace) {
-    free(trace->traceString);
+    if(trace->traceString != NULL)
+        free(trace->traceString);
     free(trace->serviceName);
     free(trace->traceId);
     hashset_destroy(trace->spanIds);
