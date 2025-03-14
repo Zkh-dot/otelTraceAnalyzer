@@ -22,7 +22,7 @@ TEST(Analyzer, AnalyzeTrace) {
     ServiceErrorCounters* counters = APIGetServiceErrorCounters(analyzer, serviceName);
     EXPECT_EQ(counters->traceCount, 1);
     FreeAnalyzer(analyzer);
-    free(counters);
+    // free(counters);
 }
 
 TEST(API, APIAnalyzeTrace) {
@@ -35,7 +35,7 @@ TEST(API, APIAnalyzeTrace) {
     ServiceErrorCounters* counters = APIGetServiceErrorCounters(analyzer, serviceName);
     EXPECT_EQ(counters->traceCount, 1);
     FreeAnalyzer(analyzer);
-    free(counters);
+    // free(counters);
 }
 
 TEST(API, APIGetServiceErrorCounters) {
@@ -46,8 +46,8 @@ TEST(API, APIGetServiceErrorCounters) {
     char* traceId = (char*)"traceId";
     APIAnalyzeTrace(analyzer, traceString, serviceName, traceId);
     CountersArr* countersArr = APIGetAllServiceErrorCounters(analyzer);
-    EXPECT_EQ(countersArr->errorCountersCount, 1);
-    EXPECT_EQ(countersArr->errorCounters[0]->traceCount, 1);
+    EXPECT_EQ(countersArr->errorCountersCount, 2);
+    EXPECT_EQ(countersArr->errorCounters[1]->traceCount, 1);
     FreeAnalyzer(analyzer);
     free(countersArr);
 }

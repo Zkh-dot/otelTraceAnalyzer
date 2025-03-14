@@ -2,6 +2,7 @@
 
 #include "config.h"
 #include <stdlib.h>
+#include <stdbool.h>
 
 typedef enum {
     UndefSpanStatus,
@@ -34,7 +35,7 @@ typedef enum {
 } TraceStatusTypes;
 
 typedef struct {
-    int statusCounter[TraceOk];
+    int statusCounter[TraceOk + 1];
     char* myBadTraceExamples[EXAMPLES_LENGTH];
     char* notmyBadTraceExamples[EXAMPLES_LENGTH];
     int myExamplesCount;

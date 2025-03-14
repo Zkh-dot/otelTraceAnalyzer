@@ -79,10 +79,14 @@ void FreeStringToTraceMap(struct hashmap* stringToTraceMap) {
 }
 
 Service* FindService(struct hashmap* stringToServiceMap, char* serviceName) {
-    struct StringToService* stringToService = (struct StringToService*)malloc(sizeof(struct StringToService));
-    InitStringToService(stringToService, serviceName, NULL);
-    Service* foundService = ((const struct StringToService*)hashmap_get(stringToServiceMap, stringToService)) -> service;
-    FreeTempStringToService(stringToService);
+    struct StringToService* searchStringToService = (struct StringToService*)malloc(sizeof(struct StringToService));
+    Service* foundService = NULL;
+    InitStringToService(searchStringToService, serviceName, NULL);
+    struct StringToService* foundStringToService = ((struct StringToService*)hashmap_get(stringToServiceMap, searchStringToService));
+    if(foundStringToService != NULL) {
+        foundService = foundStringToService->service;
+    }
+    FreeTempStringToService(searchStringToService);
     return foundService;
 }
 

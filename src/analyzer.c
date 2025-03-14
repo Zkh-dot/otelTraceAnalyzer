@@ -8,6 +8,7 @@ void InitAnalyzer(Analyzer* analyzer) {
 void FreeAnalyzer(Analyzer* analyzer) {
     FreeStringToServiceMap(analyzer->serviceMap);
     FreeStringToTraceMap(analyzer->traceMap);
+    free(analyzer);
 }
 
 void AddTrace(Analyzer* analyzer, Trace* trace) {
@@ -61,27 +62,25 @@ void AnalyzeTrace(Analyzer* analyzer, Trace* trace) {
             Service* notmyService = GetAddService(analyzer, trace->spans[i]->serviceName);
             IncCounters(notmyService->errorCounters, trace->spans[i]->spanStatus, isMy);
             AppendExample(notmyService->errorCounters, trace->traceId, isMy);
-            free(notmyService);
         }
     }
     if(!IsRootSpanError(tmpCounters)) {
         sumCounters(myService->errorCounters, tmpCounters);
+        AppendExample(myService->errorCounters, trace->traceId, 1);
     }
-    free(myService);
-    FreeServiceErrorCounters(tmpCounters);
+    // free(myService);
+    free(tmpCounters);
 }
 
 void APIAnalyzeTrace(Analyzer* analyzer, char* traceString, char* serviceName, char* traceId) {
     Trace* trace = (Trace*)malloc(sizeof(Trace));
     InitTrace(trace, traceString, serviceName, traceId);
     AnalyzeTrace(analyzer, trace);
-    free(trace);
 }
 
 ServiceErrorCounters* APIGetServiceErrorCounters(Analyzer* analyzer, char* serviceName) {
     Service* service = FindService(analyzer->serviceMap, serviceName);
     ServiceErrorCounters* counters = service->errorCounters;
-    free(service);
     return counters;
 }
 
@@ -89,17 +88,17 @@ CountersArr* APIGetAllServiceErrorCounters(Analyzer* analyzer) {
     CountersArr* arr = (CountersArr*)malloc(sizeof(CountersArr));
     ServiceErrorCounters** counters = (ServiceErrorCounters**)malloc(analyzer->serviceCount * sizeof(ServiceErrorCounters*));
     size_t iter = 0;
+    int counter = 0;
     void *item;
+    struct StringToService* e;
     while((hashmap_iter(analyzer->serviceMap, &iter, &item))) {
-        struct StringToService* e = (struct StringToService*)item;
-        counters[iter] = e->service->errorCounters;
-        FreeTempStringToService(e);
+        e = (struct StringToService*)item;
+        counters[counter] = e->service->errorCounters;
+        counter++;
     }
-    for(int i = 0; i < iter; i++) {
-        arr->errorCounters[i] = counters[i];
-    }
-    arr->errorCountersCount = iter;
-    FreeTempStringToService((struct StringToService*)item);
-    free(counters);
+    arr->errorCounters = counters;
+    arr->errorCountersCount = counter;
+    // free((struct StringToService*)item);
+    // free(e);
     return arr;
 }

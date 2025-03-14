@@ -23,10 +23,12 @@ void sumCounters(ServiceErrorCounters* errorCounters, ServiceErrorCounters* erro
     for(int i = 0; i < TraceOk; i++) {
         errorCounters->statusCounter[i] += errorCounters2->statusCounter[i];
     }
-    for(int i = 0; i < EXAMPLES_LENGTH; i++) {
-        AppendExample(errorCounters, errorCounters2->myBadTraceExamples[i], 1);
-        AppendExample(errorCounters, errorCounters2->notmyBadTraceExamples[i], 0);
-    }
+    // for(int i = 0; i < EXAMPLES_LENGTH; i++) {
+    //     if(i < errorCounters2->myExamplesCount)
+    //         AppendExample(errorCounters, errorCounters2->myBadTraceExamples[i], 1);
+    //     if(i < errorCounters2)
+    //         AppendExample(errorCounters, errorCounters2->notmyBadTraceExamples[i], 0);
+    // }
 }
 
 void IncCounters(ServiceErrorCounters* errorCounters, SpanStatusTypes status, bool isMy) {

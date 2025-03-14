@@ -39,8 +39,8 @@ target_link_libraries(analyzer_tests GTest::GTest GTest::Main)
 
 enable_testing()
 
-add_test(NAME struct_tests COMMAND tests)
-add_test(NAME analyzer_tests COMMAND tests)
+add_test(NAME struct_tests COMMAND struct_tests)
+add_test(NAME analyzer_tests COMMAND analyzer_tests)
 
 set_property(TARGET struct_tests PROPERTY C_STANDARD 23)
 set_property(TARGET analyzer_tests PROPERTY C_STANDARD 23)
