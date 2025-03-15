@@ -18,6 +18,8 @@ ext_modules = [
             "src/python_wrapper/py_translator.c",
             "src/python_wrapper/py_analyzer.c",
 
+            "src/python_wrapper/init_module.c",
+
             "src/structures/servicemap.c",
             "src/structures/service.c",
             "src/structures/span.c",

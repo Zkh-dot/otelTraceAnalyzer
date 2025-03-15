@@ -7,9 +7,9 @@ def test():
 
     t_id = "0" * 32
 
-    a.analyze_trace(t, 'some-name', t_id)
+    a.analyze(t, 'some-name', t_id)
 
-    r = a.get_service_error_counters('some-name')
+    r = a.get_counters('some-name')
 
     print(json.dumps(r, indent=4))
 
@@ -17,8 +17,6 @@ def test():
 
 def testTrace():
     t = Trace()
-    t.serviceName = "service"
-    t.spansCount = 3
 
 if __name__ == '__main__':
     test()

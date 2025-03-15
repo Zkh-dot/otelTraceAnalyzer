@@ -103,36 +103,25 @@ PyObject* PyAPIGetAllServiceErrorCountersObj(PyAnalyzer* self) {
     return dict;
 }
 
-PyMODINIT_FUNC PyInit_otelanalyzer(void) {
-    PyObject* m;
-    PyObject* type_obj = (PyObject*)&PyAnalyzerType;
+PyMethodDef PyAnalyzer_methods[] = {
+    {"analyze", (PyCFunction)PyAPIAnalyzeTrace, METH_VARARGS, "Analyze trace"},
+    {"analyze_btrace", (PyCFunction)PyAPIAnalyzeTraceBTrace, METH_O, "Analyze trace by trace object"},
+    {"get_counters", (PyCFunction)PyAPIGetServiceErrorCounters, METH_VARARGS, "Get service error counters by service name"},
+    {"get_counters_obj", (PyCFunction)PyAPIGetServiceErrorCountersObj, METH_VARARGS, "Get service error counters by service name in py obj in py object"},
+    {"get_all_counters", (PyCFunction)PyAPIGetAllServiceErrorCounters, METH_NOARGS, "Get all found service error counters"},
+    {"get_all_counters_obj", (PyCFunction)PyAPIGetAllServiceErrorCountersObj, METH_NOARGS, "Get all found service error counters in py object"},
+    {NULL}
+};
 
-    if (PyType_Ready(&PyAnalyzerType) < 0) {
-        return NULL;
-    }
-
-    static struct PyModuleDef moduledef = {
-        PyModuleDef_HEAD_INIT,
-        "otelanalyzer",
-        "module to analyze traces on OpenTelemetry format",
-        -1,
-        NULL,
-    };
-
-    m = PyModule_Create(&moduledef);
-    if (!m) {
-        return NULL;
-    }
-
-    if (PyModule_AddObject(m, "Analyzer", type_obj) < 0) {
-        Py_DECREF(m);
-        return NULL;
-    }
-    PyObject* trace_obj = (PyObject*)&PyTraceType;
-    if(PyModule_AddObject(m, "Trace", trace_obj) < 0) {
-        Py_DECREF(m);
-        return NULL;
-    }
-
-    return m;
-}
+PyTypeObject PyAnalyzerType = {
+    PyVarObject_HEAD_INIT(NULL, 0)
+    .tp_name = "pywrapper.Analyzer",
+    .tp_doc = "Analyzer objects",
+    .tp_basicsize = sizeof(PyAnalyzer),
+    .tp_itemsize = 0,
+    .tp_flags = Py_TPFLAGS_DEFAULT,
+    .tp_new = PyAnalyzer_new,
+    .tp_init = (initproc)PyAnalyzer_init,
+    .tp_dealloc = (destructor)PyAnalyzer_dealloc,
+    .tp_methods = PyAnalyzer_methods,
+};

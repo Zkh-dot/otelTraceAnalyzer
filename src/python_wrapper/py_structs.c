@@ -207,13 +207,13 @@ void _rupdateTrace(PyTrace* self) {
 // }
 
 
-const PyMethodDef PyCounters_methods[] = {
+PyMethodDef PyCounters_methods[] = {
     {"_update", (PyCFunction)_updateCounter, METH_NOARGS, "Update counter"},
     {"_rupdate", (PyCFunction)_rupdateCounter, METH_NOARGS, "Reverse update counter"},
     {NULL}
 };
 
-const PyTypeObject PyCountersType = {
+PyTypeObject PyCountersType = {
     PyVarObject_HEAD_INIT(NULL, 0)
     .tp_name = "pywrapper.Counters",
     .tp_doc = "Counters objects",
@@ -226,13 +226,13 @@ const PyTypeObject PyCountersType = {
     .tp_methods = PyCounters_methods,
 };
 
-const PyMethodDef PyTrace_methods[] = {
+PyMethodDef PyTrace_methods[] = {
     {"_update", (PyCFunction)_updateTrace, METH_NOARGS, "Update trace"},
     {"_rupdate", (PyCFunction)_rupdateTrace, METH_NOARGS, "Reverse update trace"},
     {NULL}
 };
 
-const PyTypeObject PyTraceType = {
+PyTypeObject PyTraceType = {
     PyVarObject_HEAD_INIT(NULL, 0)
     .tp_name = "pywrapper.Trace",
     .tp_doc = "Trace objects",

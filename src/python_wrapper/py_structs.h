@@ -88,9 +88,9 @@ void _rupdateTrace(PyTrace* self);
 
 // void _rupdateService(PyService* self);
 
-extern const PyMethodDef PyCounters_methods[3];
+extern PyMethodDef PyCounters_methods[3];
 
-extern const PyTypeObject PyCountersType;
+extern PyTypeObject PyCountersType;
 
 
 // PyMethodDef PySpan_methods[] = {
@@ -113,9 +113,9 @@ extern const PyTypeObject PyCountersType;
 // };
 
 
-extern const PyMethodDef PyTrace_methods[3];
+extern PyMethodDef PyTrace_methods[3];
 
-extern const PyTypeObject PyTraceType;
+extern PyTypeObject PyTraceType;
 
 
 // PyMethodDef PyService_methods[] = {

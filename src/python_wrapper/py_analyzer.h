@@ -30,28 +30,9 @@ PyObject* PyAPIGetAllServiceErrorCounters(PyAnalyzer* self);
 
 PyObject* PyAPIGetAllServiceErrorCountersObj(PyAnalyzer* self);
 
-static PyMethodDef PyAnalyzer_methods[] = {
-    {"analyze", (PyCFunction)PyAPIAnalyzeTrace, METH_VARARGS, "Analyze trace"},
-    {"analyze_btrace", (PyCFunction)PyAPIAnalyzeTraceBTrace, METH_O, "Analyze trace by trace object"},
-    {"get_counters", (PyCFunction)PyAPIGetServiceErrorCounters, METH_VARARGS, "Get service error counters by service name"},
-    {"get_counters_obj", (PyCFunction)PyAPIGetServiceErrorCountersObj, METH_VARARGS, "Get service error counters by service name in py obj in py object"},
-    {"get_all_counters", (PyCFunction)PyAPIGetAllServiceErrorCounters, METH_NOARGS, "Get all found service error counters"},
-    {"get_all_counters_obj", (PyCFunction)PyAPIGetAllServiceErrorCountersObj, METH_NOARGS, "Get all found service error counters in py object"},
-    {NULL}
-};
+extern PyMethodDef PyAnalyzer_methods[7];
 
-static PyTypeObject PyAnalyzerType = {
-    PyVarObject_HEAD_INIT(NULL, 0)
-    .tp_name = "pywrapper.Analyzer",
-    .tp_doc = "Analyzer objects",
-    .tp_basicsize = sizeof(PyAnalyzer),
-    .tp_itemsize = 0,
-    .tp_flags = Py_TPFLAGS_DEFAULT,
-    .tp_new = PyAnalyzer_new,
-    .tp_init = (initproc)PyAnalyzer_init,
-    .tp_dealloc = (destructor)PyAnalyzer_dealloc,
-    .tp_methods = PyAnalyzer_methods,
-};
+extern PyTypeObject PyAnalyzerType;
 
 #ifndef PyMODINIT_FUNC
 #define PyMODINIT_FUNC void
