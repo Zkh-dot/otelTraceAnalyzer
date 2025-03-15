@@ -1,11 +1,11 @@
 #include "py_analyzer.h"
 
-static void PyAnalyzer_dealloc(PyAnalyzer* self) {
+void PyAnalyzer_dealloc(PyAnalyzer* self) {
     FreeAnalyzer(self->analyzer);
     Py_TYPE(self)->tp_free((PyObject*)self);
 }
 
-static PyObject* PyAnalyzer_new(PyTypeObject* type, PyObject* args, PyObject* kwds) {
+PyObject* PyAnalyzer_new(PyTypeObject* type, PyObject* args, PyObject* kwds) {
     PyAnalyzer* self;
     self = (PyAnalyzer*)type->tp_alloc(type, 0);
     if (self != NULL) {
@@ -19,7 +19,7 @@ static PyObject* PyAnalyzer_new(PyTypeObject* type, PyObject* args, PyObject* kw
     return (PyObject*)self;
 }
 
-static int PyAnalyzer_init(PyAnalyzer* self, PyObject* args, PyObject* kwds) {
+int PyAnalyzer_init(PyAnalyzer* self, PyObject* args, PyObject* kwds) {
     return 0;
 }
 
@@ -71,6 +71,18 @@ PyObject* PyAPIGetServiceErrorCounters(PyAnalyzer* self, PyObject* args) {
     return PyGetServiceErrorCounters(self, counters);
 }
 
+PyObject* PyAPIGetServiceErrorCountersObj(PyAnalyzer* self, PyObject* args) {
+    const char* serviceName;
+    if (!PyArg_ParseTuple(args, "s", &serviceName)) {
+        return NULL;
+    }
+    ServiceErrorCounters* counters = APIGetServiceErrorCounters(self->analyzer, serviceName);
+    PyCounters* pyCounters = (PyCounters*)PyType_GenericAlloc(&PyCountersType, 0);
+    Py_INCREF(pyCounters);
+    setCounters4PyCounters(pyCounters, counters);
+    return (PyObject*)pyCounters;
+}
+
 PyObject* PyAPIGetAllServiceErrorCounters(PyAnalyzer* self) {
     CountersArr* countersArr = APIGetAllServiceErrorCounters(self->analyzer);
     PyObject* dict = PyDict_New();
@@ -81,41 +93,38 @@ PyObject* PyAPIGetAllServiceErrorCounters(PyAnalyzer* self) {
     return dict;
 }
 
-
-PyMODINIT_FUNC PyInit_otelanalyzer(void) {
-    PyObject* m;
-    PyObject* type_obj = (PyObject*)&PyAnalyzerType;
-
-    // Ensure the type is properly initialized
-    if (PyType_Ready(&PyAnalyzerType) < 0) {
-        return NULL;
+PyObject* PyAPIGetAllServiceErrorCountersObj(PyAnalyzer* self) {
+    CountersArr* countersArr = APIGetAllServiceErrorCounters(self->analyzer);
+    PyObject* dict = PyDict_New();
+    for(int i = 0; i < countersArr->errorCountersCount; i++) {
+        PyDict_SetItemString(
+            dict,
+            countersArr->errorCounters[i]->serviceName,
+            Counters2PyCounters(countersArr->errorCounters[i])
+        );
     }
-
-    // Module definition must match the function name "otelanalyzer"
-    static struct PyModuleDef moduledef = {
-        PyModuleDef_HEAD_INIT,
-        "otelanalyzer",  // Module name must match PyInit_otelanalyzer
-        "module to analyze traces on OpenTelemetry format",
-        -1,
-        NULL,
-    };
-
-    // Create the module
-    m = PyModule_Create(&moduledef);
-    if (!m) {
-        return NULL;  // Return NULL on failure
-    }
-
-    // Add the type to the module
-    if (PyModule_AddObject(m, "Analyzer", type_obj) < 0) {
-        Py_DECREF(m);  // Cleanup on failure
-        return NULL;
-    }
-    
-    if(PyModule_AddObject(m, "Trace", (PyObject*)&PyTraceType) < 0) {
-        Py_DECREF(m);
-        return NULL;
-    }
-
-    return m;  // Return the module object
+    return dict;
 }
+
+PyMethodDef PyAnalyzer_methods[] = {
+    {"analyze", (PyCFunction)PyAPIAnalyzeTrace, METH_VARARGS, "Analyze trace"},
+    {"analyze_btrace", (PyCFunction)PyAPIAnalyzeTraceBTrace, METH_O, "Analyze trace by trace object"},
+    {"get_counters", (PyCFunction)PyAPIGetServiceErrorCounters, METH_VARARGS, "Get service error counters by service name"},
+    {"get_counters_obj", (PyCFunction)PyAPIGetServiceErrorCountersObj, METH_VARARGS, "Get service error counters by service name in py obj in py object"},
+    {"get_all_counters", (PyCFunction)PyAPIGetAllServiceErrorCounters, METH_NOARGS, "Get all found service error counters"},
+    {"get_all_counters_obj", (PyCFunction)PyAPIGetAllServiceErrorCountersObj, METH_NOARGS, "Get all found service error counters in py object"},
+    {NULL}
+};
+
+PyTypeObject PyAnalyzerType = {
+    PyVarObject_HEAD_INIT(NULL, 0)
+    .tp_name = "pywrapper.Analyzer",
+    .tp_doc = "Analyzer objects",
+    .tp_basicsize = sizeof(PyAnalyzer),
+    .tp_itemsize = 0,
+    .tp_flags = Py_TPFLAGS_DEFAULT,
+    .tp_new = PyAnalyzer_new,
+    .tp_init = (initproc)PyAnalyzer_init,
+    .tp_dealloc = (destructor)PyAnalyzer_dealloc,
+    .tp_methods = PyAnalyzer_methods,
+};
