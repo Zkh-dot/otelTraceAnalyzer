@@ -2,8 +2,7 @@
 
 #include <Python.h>
 #include "../analyzer.h"
-#include "py_struct_translator.h"
-#include "structmember.h"
+#include "py_structs.h"
 
 typedef struct {
     PyObject_HEAD
@@ -16,9 +15,11 @@ static PyObject* PyAnalyzer_new(PyTypeObject* type, PyObject* args, PyObject* kw
 
 static int PyAnalyzer_init(PyAnalyzer* self, PyObject* args, PyObject* kwds);
 
+PyObject* PyGetServiceErrorCounters(PyAnalyzer* self, ServiceErrorCounters* counters);
+
 PyObject* PyAPIAnalyzeTrace(PyAnalyzer* self, PyObject* args);
 
-PyObject* PyGetServiceErrorCounters(PyAnalyzer* self, ServiceErrorCounters* counters);
+PyObject* PyAPIAnalyzeTraceBTrace(PyAnalyzer* self, PyTrace* trace);
 
 PyObject* PyAPIGetServiceErrorCounters(PyAnalyzer* self, PyObject* args);
 
@@ -48,4 +49,4 @@ static PyTypeObject PyAnalyzerType = {
 #define PyMODINIT_FUNC void
 #endif
 
-PyMODINIT_FUNC PyInit_libanalyzer(void);
+PyMODINIT_FUNC PyInit_otelanalyzer(void);

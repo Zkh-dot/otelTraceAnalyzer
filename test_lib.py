@@ -1,4 +1,4 @@
-from analyzer import Analyzer
+from otelanalyzer import *
 import json
 def test():
     a = Analyzer()
@@ -15,5 +15,9 @@ def test():
 
     print(type(r))
 
+def testTrace():
+    t = Trace()
+
 if __name__ == '__main__':
     test()
+    testTrace()

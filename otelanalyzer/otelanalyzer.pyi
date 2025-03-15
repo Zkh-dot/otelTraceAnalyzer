@@ -7,3 +7,12 @@ class Analyzer:
         ...
     def get_all_service_error_counters(self) -> dict[str, dict[str, int]]:
         ...
+
+class Trace:
+    traceString: str
+    traceId: str
+    serviceName: str
+    spansCount: int
+    def __init__(self, trace_id: str) -> None:
+        ...
+    

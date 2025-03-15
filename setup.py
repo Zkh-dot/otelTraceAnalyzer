@@ -14,6 +14,7 @@ ext_modules = [
             "src/hashstructs/hashset.c",
 
             # "src/python_wrapper/py_struct_translator.c",
+            "src/python_wrapper/py_structs.c",
             "src/python_wrapper/py_analyzer.c",
 
             "src/structures/servicemap.c",
@@ -39,8 +40,8 @@ class BuildExt(build_ext):
                 ext.extra_link_args += ["-shared"]
         super().build_extensions()
 
-        if os.path.exists("otelanalyzer.so"):
-            shutil.move("otelanalyzer.so", os.path.join("analyzer", "otelanalyzer.so"))
+        if os.path.exists("./otelanalyzer.so"):
+            shutil.move("otelanalyzer.so", os.path.join("otelanalyzer", "otelanalyzer.so"))
 
 setup(
     name="otelanalyzer",

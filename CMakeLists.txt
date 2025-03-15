@@ -22,7 +22,11 @@ set(CMAKE_BUILD_TYPE Debug)
 
 find_package(Python3 COMPONENTS Development REQUIRED)
 
-Python3_add_library(analyzer SHARED ${LIB_FILES} src/python_wrapper/py_analyzer.c)
+Python3_add_library(
+    analyzer SHARED ${LIB_FILES} 
+    src/python_wrapper/py_structs.c
+    src/python_wrapper/py_analyzer.c 
+)
 
 # mem test
 

@@ -34,6 +34,13 @@ PyObject* PyAPIAnalyzeTrace(PyAnalyzer* self, PyObject* args) {
     Py_RETURN_NONE;
 }
 
+PyObject* PyAPIAnalyzeTraceBTrace(PyAnalyzer* self, PyTrace* trace) {
+    _updateTrace(trace);
+    AnalyzeTrace(self->analyzer, trace->_trace);
+    _rupdateTrace(trace);
+    Py_RETURN_NONE;
+}
+
 PyObject* PyGetServiceErrorCounters(PyAnalyzer* self, ServiceErrorCounters* counters) {
     PyObject* dict = PyDict_New();
     for(int i = 0; i < TraceOk; i++) {
@@ -74,22 +81,6 @@ PyObject* PyAPIGetAllServiceErrorCounters(PyAnalyzer* self) {
     return dict;
 }
 
-// PyMODINIT_FUNC PyInit_otelanalyzer(void) {
-//     PyObject* m;
-//     if (PyType_Ready(&PyAnalyzerType) < 0) {
-//         return NULL;
-//     }
-//     static struct PyModuleDef moduledef = {
-//         PyModuleDef_HEAD_INIT,
-//         "otelanalyzer",
-//         "module to analyze traces on OpenTelemetry format",
-//         -1,
-//         NULL,
-//     };
-//     m = PyModule_Create(&moduledef);
-//     Py_IncRef((PyObject*)&PyAnalyzerType);
-//     PyModule_AddObject(m, "Analyzer", (PyObject*)&PyAnalyzerType);
-// }
 
 PyMODINIT_FUNC PyInit_otelanalyzer(void) {
     PyObject* m;
@@ -118,6 +109,11 @@ PyMODINIT_FUNC PyInit_otelanalyzer(void) {
     // Add the type to the module
     if (PyModule_AddObject(m, "Analyzer", type_obj) < 0) {
         Py_DECREF(m);  // Cleanup on failure
+        return NULL;
+    }
+    
+    if(PyModule_AddObject(m, "Trace", (PyObject*)&PyTraceType) < 0) {
+        Py_DECREF(m);
         return NULL;
     }
 
