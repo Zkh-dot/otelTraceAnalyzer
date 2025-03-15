@@ -28,7 +28,7 @@ int PyCounters_init(PyCounters* self, PyObject* args, PyObject* kwds);
 
 void _updateCounter(PyCounters* self);
 
-void _rupdateCounter(PyCounters* self);
+void setCounters4PyCounters(PyCounters* self, ServiceErrorCounters* counters);
 
 // typedef struct {
 //     PyObject_HEAD
@@ -90,14 +90,11 @@ void _rupdateTrace(PyTrace* self);
 
 extern PyMethodDef PyCounters_methods[3];
 
+extern PyMemberDef PyCounters_members[9];
+
 extern PyTypeObject PyCountersType;
 
-
-// PyMethodDef PySpan_methods[] = {
-//     {"_update", (PyCFunction)_updateSpan, METH_NOARGS, "Update span"},
-//     {"_rupdate", (PyCFunction)_rupdateSpan, METH_NOARGS, "Reverse update span"},
-//     {NULL}
-// };
+// extern PyMethodDef PySpan_methods[];
 
 // PyTypeObject PySpanType = {
 //     PyVarObject_HEAD_INIT(NULL, 0)
@@ -115,6 +112,8 @@ extern PyTypeObject PyCountersType;
 
 extern PyMethodDef PyTrace_methods[3];
 
+extern PyMemberDef PyTrace_members[5];
+
 extern PyTypeObject PyTraceType;
 
 
@@ -127,7 +126,7 @@ extern PyTypeObject PyTraceType;
 // PyTypeObject PyServiceType = {
 //     PyVarObject_HEAD_INIT(NULL, 0)
 //     .tp_name = "pywrapper.Service",
-//     .tp_doc = "Service objects",
+    // .tp_doc = "Service objects",
 //     .tp_basicsize = sizeof(PyService),
 //     .tp_itemsize = 0,
 //     .tp_flags = Py_TPFLAGS_DEFAULT,

@@ -10,11 +10,11 @@ typedef struct {
     Analyzer* analyzer;
 } PyAnalyzer;
 
-static void PyAnalyzer_dealloc(PyAnalyzer* self);
+void PyAnalyzer_dealloc(PyAnalyzer* self);
 
-static PyObject* PyAnalyzer_new(PyTypeObject* type, PyObject* args, PyObject* kwds);
+PyObject* PyAnalyzer_new(PyTypeObject* type, PyObject* args, PyObject* kwds);
 
-static int PyAnalyzer_init(PyAnalyzer* self, PyObject* args, PyObject* kwds);
+int PyAnalyzer_init(PyAnalyzer* self, PyObject* args, PyObject* kwds);
 
 PyObject* PyGetServiceErrorCounters(PyAnalyzer* self, ServiceErrorCounters* counters);
 
@@ -37,5 +37,3 @@ extern PyTypeObject PyAnalyzerType;
 #ifndef PyMODINIT_FUNC
 #define PyMODINIT_FUNC void
 #endif
-
-PyMODINIT_FUNC PyInit_otelanalyzer(void);

@@ -1,11 +1,11 @@
 #include "py_analyzer.h"
 
-static void PyAnalyzer_dealloc(PyAnalyzer* self) {
+void PyAnalyzer_dealloc(PyAnalyzer* self) {
     FreeAnalyzer(self->analyzer);
     Py_TYPE(self)->tp_free((PyObject*)self);
 }
 
-static PyObject* PyAnalyzer_new(PyTypeObject* type, PyObject* args, PyObject* kwds) {
+PyObject* PyAnalyzer_new(PyTypeObject* type, PyObject* args, PyObject* kwds) {
     PyAnalyzer* self;
     self = (PyAnalyzer*)type->tp_alloc(type, 0);
     if (self != NULL) {
@@ -19,7 +19,7 @@ static PyObject* PyAnalyzer_new(PyTypeObject* type, PyObject* args, PyObject* kw
     return (PyObject*)self;
 }
 
-static int PyAnalyzer_init(PyAnalyzer* self, PyObject* args, PyObject* kwds) {
+int PyAnalyzer_init(PyAnalyzer* self, PyObject* args, PyObject* kwds) {
     return 0;
 }
 
@@ -77,7 +77,10 @@ PyObject* PyAPIGetServiceErrorCountersObj(PyAnalyzer* self, PyObject* args) {
         return NULL;
     }
     ServiceErrorCounters* counters = APIGetServiceErrorCounters(self->analyzer, serviceName);
-    return (PyObject*)Counters2PyCounters(counters);
+    PyCounters* pyCounters = (PyCounters*)PyType_GenericAlloc(&PyCountersType, 0);
+    Py_INCREF(pyCounters);
+    setCounters4PyCounters(pyCounters, counters);
+    return (PyObject*)pyCounters;
 }
 
 PyObject* PyAPIGetAllServiceErrorCounters(PyAnalyzer* self) {

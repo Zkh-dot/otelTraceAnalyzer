@@ -65,11 +65,8 @@ Span* FindSpan(Span** spans, int count, const char* spanId) {
 
 // not tested
 void BuildSpanTree(Span** spans, int count) {
-    Span* root = NULL;
     for (int i = 0; i < count; i++) {
-        if (spans[i]->parentSpanId == NULL) {
-            root = spans[i];
-        } else {
+        if (spans[i]->parentSpanId != NULL) {
             Span* parentSpan = FindSpan(spans, count, spans[i]->parentSpanId);
             if (parentSpan != NULL) {
                 spans[i]->parentSpan = parentSpan;

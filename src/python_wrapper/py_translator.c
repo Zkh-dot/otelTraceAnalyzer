@@ -5,9 +5,9 @@ ServiceErrorCounters* PyCounters2Counters(PyObject* counters) {
 }
 
 PyObject* Counters2PyCounters(ServiceErrorCounters* counters) {
-    PyCounters* pyCounters = (PyCounters*)PyCounters_new(&PyCountersType, NULL, NULL);
+    PyCounters* pyCounters = (PyCounters*)PyType_GenericAlloc(&PyCountersType, 0);
     Py_INCREF(pyCounters);
-    pyCounters->_statusCounter = counters;
+    setCounters4PyCounters(pyCounters, counters);
     return (PyObject*)pyCounters;
 }
 

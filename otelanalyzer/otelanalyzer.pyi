@@ -26,3 +26,16 @@ class Trace:
     def __init__(self, trace_id: str) -> None:
         ...
     
+
+# class Counters:
+#     myBadTraceExamples: list[str]
+#     notmyBadTraceExamples: list[str]
+#     myExamplesCount: int
+#     notmyExamplesCount: int
+#     serviceName: str
+#     badTraceCount: int
+#     mySpanCount: int
+#     traceCount: int
+#     def __init__(self) -> None:
+#         ...
+    

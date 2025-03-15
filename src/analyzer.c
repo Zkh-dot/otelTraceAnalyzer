@@ -38,7 +38,7 @@ void AnalyzeTrace(Analyzer* analyzer, Trace* trace) {
     for(int i = 0; i < trace->spansCount; i++) {
         bool isMy = strcmp(trace->serviceName, trace->spans[i]->serviceName) == 0;
         myService->errorCounters->mySpanCount += isMy;
-        if(trace->spans[i] == NULL) {
+        if(trace->spans[i]->parentSpanId == NULL) {
             trace->spans[i]->spanStatus = MissingParent;
             badSpanCount++;
         } else {
