@@ -5,7 +5,7 @@ import json
 def test(a: Analyzer, t: str = "", i: int = 0):
     t_id = "0" * 31 + str(i)
 
-    t = "[{'spanId': '0000000000000000', 'serviceName': 'some-name', 'traceId': '00000000000000000000000000000000', 'project': 'some-project', 'service': 'some-service'}]"
+    t = "[{'spanId': '0000000000000000', 'serviceName': 'some-name-" + str(10000) + "', 'traceId': '00000000000000000000000000000000', 'project': 'some-project', 'service': 'some-service'}]"
 
     a.analyze(t, 'some-name', t_id)
 
