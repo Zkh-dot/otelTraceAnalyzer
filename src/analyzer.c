@@ -3,6 +3,9 @@
 void InitAnalyzer(Analyzer* analyzer) {
     analyzer->serviceMap = GetStringToServiceMap();
     analyzer->traceMap = GetStringToTraceMap();
+    analyzer->serviceCount = 0;
+    analyzer->traceCount = 0;
+    analyzer->storeTraces = false;
 }
 
 void FreeAnalyzer(Analyzer* analyzer) {
@@ -28,7 +31,8 @@ Service* GetAddService(Analyzer* analyzer, const char* serviceName) {
 }
 
 void AnalyzeTrace(Analyzer* analyzer, Trace* trace) {
-    AddTrace(analyzer, trace);
+    if(analyzer->storeTraces)
+        AddTrace(analyzer, trace);
     FindAllSpans(trace);
     int badSpanCount = 0;
     Service* myService = GetAddService(analyzer, trace->serviceName);
@@ -70,6 +74,8 @@ void AnalyzeTrace(Analyzer* analyzer, Trace* trace) {
     }
     // free(myService);
     free(tmpCounters);
+    if(!analyzer->storeTraces)
+        FreeTrace(trace);
 }
 
 void APIAnalyzeTrace(

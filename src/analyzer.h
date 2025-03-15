@@ -9,6 +9,7 @@ typedef struct {
     struct hashmap* traceMap;
     int serviceCount;
     int traceCount;
+    bool storeTraces;
 } Analyzer;
 
 void InitAnalyzer(Analyzer* analyzer);
