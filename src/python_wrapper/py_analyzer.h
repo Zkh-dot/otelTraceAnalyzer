@@ -3,6 +3,7 @@
 #include <Python.h>
 #include "../analyzer.h"
 #include "py_structs.h"
+#include "py_translator.h"
 
 typedef struct {
     PyObject_HEAD
@@ -23,12 +24,19 @@ PyObject* PyAPIAnalyzeTraceBTrace(PyAnalyzer* self, PyTrace* trace);
 
 PyObject* PyAPIGetServiceErrorCounters(PyAnalyzer* self, PyObject* args);
 
+PyObject* PyAPIGetServiceErrorCountersObj(PyAnalyzer* self, PyObject* args);
+
 PyObject* PyAPIGetAllServiceErrorCounters(PyAnalyzer* self);
 
+PyObject* PyAPIGetAllServiceErrorCountersObj(PyAnalyzer* self);
+
 static PyMethodDef PyAnalyzer_methods[] = {
-    {"analyze_trace", (PyCFunction)PyAPIAnalyzeTrace, METH_VARARGS, "Analyze trace"},
-    {"get_service_error_counters", (PyCFunction)PyAPIGetServiceErrorCounters, METH_VARARGS, "Get service error counters by service name"},
-    {"get_all_service_error_counters", (PyCFunction)PyAPIGetAllServiceErrorCounters, METH_NOARGS, "Get all found service error counters"},
+    {"analyze", (PyCFunction)PyAPIAnalyzeTrace, METH_VARARGS, "Analyze trace"},
+    {"analyze_btrace", (PyCFunction)PyAPIAnalyzeTraceBTrace, METH_O, "Analyze trace by trace object"},
+    {"get_counters", (PyCFunction)PyAPIGetServiceErrorCounters, METH_VARARGS, "Get service error counters by service name"},
+    {"get_counters_obj", (PyCFunction)PyAPIGetServiceErrorCountersObj, METH_VARARGS, "Get service error counters by service name in py obj in py object"},
+    {"get_all_counters", (PyCFunction)PyAPIGetAllServiceErrorCounters, METH_NOARGS, "Get all found service error counters"},
+    {"get_all_counters_obj", (PyCFunction)PyAPIGetAllServiceErrorCountersObj, METH_NOARGS, "Get all found service error counters in py object"},
     {NULL}
 };
 

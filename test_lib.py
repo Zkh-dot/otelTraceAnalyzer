@@ -17,6 +17,8 @@ def test():
 
 def testTrace():
     t = Trace()
+    t.serviceName = "service"
+    t.spansCount = 3
 
 if __name__ == '__main__':
     test()

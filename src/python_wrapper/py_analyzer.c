@@ -71,6 +71,15 @@ PyObject* PyAPIGetServiceErrorCounters(PyAnalyzer* self, PyObject* args) {
     return PyGetServiceErrorCounters(self, counters);
 }
 
+PyObject* PyAPIGetServiceErrorCountersObj(PyAnalyzer* self, PyObject* args) {
+    const char* serviceName;
+    if (!PyArg_ParseTuple(args, "s", &serviceName)) {
+        return NULL;
+    }
+    ServiceErrorCounters* counters = APIGetServiceErrorCounters(self->analyzer, serviceName);
+    return (PyObject*)Counters2PyCounters(counters);
+}
+
 PyObject* PyAPIGetAllServiceErrorCounters(PyAnalyzer* self) {
     CountersArr* countersArr = APIGetAllServiceErrorCounters(self->analyzer);
     PyObject* dict = PyDict_New();
@@ -81,41 +90,49 @@ PyObject* PyAPIGetAllServiceErrorCounters(PyAnalyzer* self) {
     return dict;
 }
 
+PyObject* PyAPIGetAllServiceErrorCountersObj(PyAnalyzer* self) {
+    CountersArr* countersArr = APIGetAllServiceErrorCounters(self->analyzer);
+    PyObject* dict = PyDict_New();
+    for(int i = 0; i < countersArr->errorCountersCount; i++) {
+        PyDict_SetItemString(
+            dict,
+            countersArr->errorCounters[i]->serviceName,
+            Counters2PyCounters(countersArr->errorCounters[i])
+        );
+    }
+    return dict;
+}
 
 PyMODINIT_FUNC PyInit_otelanalyzer(void) {
     PyObject* m;
     PyObject* type_obj = (PyObject*)&PyAnalyzerType;
 
-    // Ensure the type is properly initialized
     if (PyType_Ready(&PyAnalyzerType) < 0) {
         return NULL;
     }
 
-    // Module definition must match the function name "otelanalyzer"
     static struct PyModuleDef moduledef = {
         PyModuleDef_HEAD_INIT,
-        "otelanalyzer",  // Module name must match PyInit_otelanalyzer
+        "otelanalyzer",
         "module to analyze traces on OpenTelemetry format",
         -1,
         NULL,
     };
 
-    // Create the module
     m = PyModule_Create(&moduledef);
     if (!m) {
-        return NULL;  // Return NULL on failure
-    }
-
-    // Add the type to the module
-    if (PyModule_AddObject(m, "Analyzer", type_obj) < 0) {
-        Py_DECREF(m);  // Cleanup on failure
         return NULL;
     }
-    
-    if(PyModule_AddObject(m, "Trace", (PyObject*)&PyTraceType) < 0) {
+
+    if (PyModule_AddObject(m, "Analyzer", type_obj) < 0) {
+        Py_DECREF(m);
+        return NULL;
+    }
+    PyObject* trace_obj = (PyObject*)&PyTraceType;
+    if(PyModule_AddObject(m, "Trace", trace_obj) < 0) {
         Py_DECREF(m);
         return NULL;
     }
 
-    return m;  // Return the module object
+    return m;
 }
