@@ -14,9 +14,13 @@ PyMODINIT_FUNC PyInit_otelanalyzer(void) {
         return NULL;
     }
 
-    // if (PyType_Ready(&PyCountersType) < 0) {
-    //     return NULL;
-    // }
+    if (PyType_Ready(&PyCountersType) < 0) {
+        return NULL;
+    }
+
+    if (PyType_Ready(&PyServiceType) < 0) {
+        return NULL;
+    }
 
     static struct PyModuleDef moduledef = {
         PyModuleDef_HEAD_INIT,
@@ -40,11 +44,17 @@ PyMODINIT_FUNC PyInit_otelanalyzer(void) {
         Py_DECREF(m);
         return NULL;
     }
-    // PyObject* counters_obj = (PyObject*)&PyCountersType;
-    // if(PyModule_AddObject(m, "Counters", counters_obj) < 0) {
-    //     Py_DECREF(m);
-    //     return NULL;
-    // }
+    PyObject* counters_obj = (PyObject*)&PyCountersType;
+    if(PyModule_AddObject(m, "Counters", counters_obj) < 0) {
+        Py_DECREF(m);
+        return NULL;
+    }
+
+    PyObject* service_obj = (PyObject*)&PyServiceType;
+    if(PyModule_AddObject(m, "Service", service_obj) < 0) {
+        Py_DECREF(m);
+        return NULL;
+    }
 
     return m;
 }

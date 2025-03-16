@@ -7,6 +7,7 @@
 #include "../structures/service.h"
 #include "../structures/servicemap.h"
 
+// counters
 typedef struct {
     PyObject_HEAD
     ServiceErrorCounters* _statusCounter;
@@ -30,27 +31,13 @@ void _updateCounter(PyCounters* self);
 
 void setCounters4PyCounters(PyCounters* self, ServiceErrorCounters* counters);
 
-// typedef struct {
-//     PyObject_HEAD
-//     Span* _span;
-//     PyObject* spanId;
-//     PyObject* serviceName;
-//     PyObject* parentSpanId;
-//     PyObject* traceId;
-//     PyObject* parentSpan;
-//     PyObject* spanStatus;
-// } PySpan;
+extern PyMethodDef PyCounters_methods[1];
 
-// void PySpan_dealloc(PySpan* self);
+extern PyMemberDef PyCounters_members[9];
 
-// PyObject* PySpan_new(PyTypeObject* type, PyObject* args, PyObject* kwds);
+extern PyTypeObject PyCountersType;
 
-// int PySpan_init(PySpan* self, PyObject* args, PyObject* kwds);
-
-// void _updateSpan(PySpan* self);
-
-// void _rupdateSpan(PySpan* self);
-
+// trace
 typedef struct {
     PyObject_HEAD
     Trace* _trace;
@@ -70,60 +57,35 @@ void _updateTrace(PyTrace* self);
 
 void _rupdateTrace(PyTrace* self);
 
-// typedef struct {
-//     PyObject_HEAD
-//     Service* _service;
-//     PyObject* serviceName;
-//     PyCounters* errorCounters;
-//     PyObject* traces;
-// } PyService;
-
-// void PyService_dealloc(PyService* self);
-
-// PyObject* PyService_new(PyTypeObject* type, PyObject* args, PyObject* kwds);
-
-// int PyService_init(PyService* self, PyObject* args, PyObject* kwds);
-
-// void _updateService(PyService* self);
-
-// void _rupdateService(PyService* self);
-
-extern PyMethodDef PyCounters_methods[3];
-
-extern PyMemberDef PyCounters_members[9];
-
-extern PyTypeObject PyCountersType;
-
-// extern PyMethodDef PySpan_methods[];
-
-// PyTypeObject PySpanType = {
-//     PyVarObject_HEAD_INIT(NULL, 0)
-//     .tp_name = "pywrapper.Span",
-//     .tp_doc = "Span objects",
-//     .tp_basicsize = sizeof(PySpan),
-//     .tp_itemsize = 0,
-//     .tp_flags = Py_TPFLAGS_DEFAULT,
-//     .tp_new = PySpan_new,
-//     .tp_init = (initproc)PySpan_init,
-//     .tp_dealloc = (destructor)PySpan_dealloc,
-//     .tp_methods = PySpan_methods,
-// };
-
-
-extern PyMethodDef PyTrace_methods[3];
+extern PyMethodDef PyTrace_methods[1];
 
 extern PyMemberDef PyTrace_members[5];
 
 extern PyTypeObject PyTraceType;
 
+// service
+typedef struct {
+    PyObject_HEAD
+    Service* _service;
+    PyCounters* errorCounters;
+    PyObject* serviceName;
+} PyService;
 
-// PyMethodDef PyService_methods[] = {
-//     {"_update", (PyCFunction)_updateService, METH_NOARGS, "Update service"},
-//     {"_rupdate", (PyCFunction)_rupdateService, METH_NOARGS, "Reverse update service"},
-//     {NULL}
-// };
+void PyService_dealloc(PyService* self);
 
-// PyTypeObject PyServiceType = {
+PyObject* PyService_new(PyTypeObject* type, PyObject* args, PyObject* kwds);
+
+int PyService_init(PyService* self, PyObject* args, PyObject* kwds);
+
+void _updateService(PyService* self);
+
+void setService4PyService(PyService* self, Service* service);
+
+extern PyMethodDef PyService_methods[1];
+
+extern PyMemberDef PyService_members[3];
+
+extern PyTypeObject PyServiceType;// = {
 //     PyVarObject_HEAD_INIT(NULL, 0)
 //     .tp_name = "pywrapper.Service",
     // .tp_doc = "Service objects",
