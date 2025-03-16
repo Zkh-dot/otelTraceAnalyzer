@@ -1,7 +1,14 @@
 class Counters:
+    myBadTraceExamples: list[str]
+    notmyBadTraceExamples: list[str]
+    myExamplesCount: int
+    notmyExamplesCount: int
+    serviceName: str
+    badTraceCount: int
+    mySpanCount: int
+    traceCount: int
     def __init__(self) -> None:
         ...
-
 class Analyzer:
     def __init__(self) -> None:
         ...
@@ -17,6 +24,10 @@ class Analyzer:
         ...
     def get_all_counters_obj(self) -> dict[str, Counters]:
         ...
+    def get_service(self, service_name: str) -> Service:
+        ...
+    def get_all_services(self) -> list[Service]:
+        ...
 
 class Trace:
     traceString: str
@@ -25,17 +36,9 @@ class Trace:
     spansCount: int
     def __init__(self, trace_id: str) -> None:
         ...
-    
 
-# class Counters:
-#     myBadTraceExamples: list[str]
-#     notmyBadTraceExamples: list[str]
-#     myExamplesCount: int
-#     notmyExamplesCount: int
-#     serviceName: str
-#     badTraceCount: int
-#     mySpanCount: int
-#     traceCount: int
-#     def __init__(self) -> None:
-#         ...
-    
+class Service:
+    serviceName: str
+    errorCounters: Counters
+    def __init__(self) -> None:
+        ...

@@ -30,7 +30,11 @@ PyObject* PyAPIGetAllServiceErrorCounters(PyAnalyzer* self);
 
 PyObject* PyAPIGetAllServiceErrorCountersObj(PyAnalyzer* self);
 
-extern PyMethodDef PyAnalyzer_methods[7];
+PyObject* PyAPIGetServiceObj(PyAnalyzer* self, PyObject* args);
+
+PyObject* PyAPIGetAllServiceObj(PyAnalyzer* self);
+
+extern PyMethodDef PyAnalyzer_methods[9];
 
 extern PyTypeObject PyAnalyzerType;
 
