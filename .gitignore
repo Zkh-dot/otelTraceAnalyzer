@@ -80,3 +80,8 @@ CTestTestfile.cmake
 *temp*
 
 */__pycache__/*
+docs/installation/__pycache__/*
+
+.venv/*
+dist/*
+*.egg-info/*
