@@ -1,3 +1,5 @@
+#pragma once
+
 #include "structures/counters.h"
 #include "structures/span.h"
 #include "structures/trace.h"
@@ -20,6 +22,8 @@ void AddTrace(Analyzer* analyzer, Trace* trace);
 
 Service* GetAddService(Analyzer* analyzer, const char* serviceName);
 
+void ParceTrace(Analyzer* analyzer, Trace* trace);
+
 void AnalyzeTrace(Analyzer* analyzer, Trace* trace);
 
 void APIAnalyzeTrace(
@@ -32,3 +36,6 @@ void APIAnalyzeTrace(
 ServiceErrorCounters* APIGetServiceErrorCounters(Analyzer* analyzer, const char* serviceName);
 
 CountersArr* APIGetAllServiceErrorCounters(Analyzer* analyzer);
+
+extern void (*pluginPtrs[])(Analyzer*, Trace*);
+extern const int pluginCount;

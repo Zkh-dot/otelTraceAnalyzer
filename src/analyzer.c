@@ -30,7 +30,7 @@ Service* GetAddService(Analyzer* analyzer, const char* serviceName) {
     return tmpService;
 }
 
-void AnalyzeTrace(Analyzer* analyzer, Trace* trace) {
+void ParceTrace(Analyzer* analyzer, Trace* trace) {
     if(analyzer->storeTraces)
         AddTrace(analyzer, trace);
     FindAllSpans(trace);
@@ -72,8 +72,16 @@ void AnalyzeTrace(Analyzer* analyzer, Trace* trace) {
         sumCounters(myService->errorCounters, tmpCounters);
         AppendExample(myService->errorCounters, trace->traceId, 1);
     }
-    // free(myService);
     free(tmpCounters);
+}
+
+void AnalyzeTrace(Analyzer* analyzer, Trace* trace) {
+    ParceTrace(analyzer, trace);
+    
+    for(int i = 0; i < pluginCount; i++) {
+        pluginPtrs[i](analyzer, trace);
+    }
+
     if(!analyzer->storeTraces)
         FreeTrace(trace);
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Python.h>
+#include <structmember.h>
 #include "../analyzer.h"
 #include "py_structs.h"
 #include "py_translator.h"
