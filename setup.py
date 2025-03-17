@@ -3,32 +3,35 @@ from setuptools.command.build_ext import build_ext
 import sys
 import shutil, os
 
+SOURCE_FILES = [
+    "src/analyzer.c",
+    "src/plugins.c",
+    "src/plugins/example_plugin.c",
+
+    "src/hashstructs/hashset_itr.c",
+    "src/hashstructs/hashmap.c",
+    "src/hashstructs/hashset.c",
+
+    "src/python_wrapper/py_structs.c",
+    "src/python_wrapper/py_translator.c",
+    "src/python_wrapper/py_analyzer.c",
+
+    "src/python_wrapper/init_module.c",
+
+    "src/structures/servicemap.c",
+    "src/structures/service.c",
+    "src/structures/span.c",
+    "src/structures/trace.c",
+    "src/structures/counters.c",
+]
+
 ext_modules = [
     Extension(
         "otelanalyzer",
-        sources=[
-            "src/analyzer.c",
-
-            "src/hashstructs/hashset_itr.c",
-            "src/hashstructs/hashmap.c",
-            "src/hashstructs/hashset.c",
-
-            # "src/python_wrapper/py_struct_translator.c",
-            "src/python_wrapper/py_structs.c",
-            "src/python_wrapper/py_translator.c",
-            "src/python_wrapper/py_analyzer.c",
-
-            "src/python_wrapper/init_module.c",
-
-            "src/structures/servicemap.c",
-            "src/structures/service.c",
-            "src/structures/span.c",
-            "src/structures/trace.c",
-            "src/structures/counters.c",
-        ],
+        sources=SOURCE_FILES,
         include_dirs=["."],
         language="c",
-        extra_compile_args=["-std=c23"],
+        extra_compile_args=["-std=c2x"],
     )
 ]
 
@@ -48,16 +51,18 @@ class BuildExt(build_ext):
 
 setup(
     name="otelanalyzer",
-    version="0.1",
+    version="0.1.2",
     author="zkh-dot",
     author_email="kernzahar@gmail.com",
-    python_requires=">=3.6",
+    python_requires=">=3.10",
     description="Pure C lib for python3 (or C if u wanna) to analyze traces check for compliance with the OpenTelemetry standard",
     classifiers=[
         'Programming Language :: Python :: 3',
         'License :: OSI Approved :: MIT License',  # License type
-        'Operating System :: Linux',
+        'Operating System :: POSIX :: Linux',
     ],
+    package_data={"otelanalyzer": ["*.c", "*.h", "*.pyi"]},
     cmdclass={"build_ext": BuildExt},
+    long_description=open("README.md").read(),
     ext_modules=ext_modules,
 )

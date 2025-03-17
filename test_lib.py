@@ -11,7 +11,6 @@ def test(a: Analyzer, t: str = "", i: int = 0):
 
     del t
     del t_id
-
     # print(json.dumps(r, indent=4))
 
     # print(type(r))
@@ -72,7 +71,9 @@ def test_all_services(a: Analyzer, t: str):
 if __name__ == '__main__':
     t = "[{'spanId': '0000000000000000', 'serviceName': 'some-name', 'traceId': '00000000000000000000000000000000', 'project': 'some-project', 'service': 'some-service'}]"
     # t = "[{'spanId': '0000000000000000', 'serviceName': 'some-name', 'parentSpanId': '0000000000000000', 'traceId': '00000000000000000000000000000000', 'project': 'some-project', 'service': 'some-service'}]"
-    a = Analyzer()  
+    a = Analyzer()
+    test(a, t)
+    testTrace(a, t)
     testCounters(a, t)
     testAllCounters(a, t)
     test_service(a, t)

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Python.h>
+#include <structmember.h>
 #include "../structures/counters.h"
 #include "../structures/span.h"
 #include "../structures/trace.h"
