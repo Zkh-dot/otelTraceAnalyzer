@@ -10,7 +10,7 @@ TEST(Analyzer, InitFreeAnalyzer) {
     FreeAnalyzer(analyzer);
 }
 
-TEST(Analyzer, AnalyzeTrace) {
+TEST(Analyzer, APIAnalyzeTrace) {
     Analyzer* analyzer = (Analyzer*)malloc(sizeof(Analyzer));
     InitAnalyzer(analyzer);
     char* traceString = (char*)"[{'spanId': '0000000000000000', 'serviceName': 'some-name', 'parentSpanId': '0000000000000000', 'traceId': '00000000000000000000000000000000', 'project': 'some-project', 'service': 'some-service'}]";
@@ -18,7 +18,7 @@ TEST(Analyzer, AnalyzeTrace) {
     char* traceId = (char*)"traceId";
     Trace* trace = (Trace*)malloc(sizeof(Trace));
     InitTrace(trace, traceString, serviceName, traceId);
-    AnalyzeTrace(analyzer, trace);
+    APIAnalyzeTraceObj(analyzer, trace);
     ServiceErrorCounters* counters = APIGetServiceErrorCounters(analyzer, serviceName);
     EXPECT_EQ(counters->traceCount, 1);
     FreeAnalyzer(analyzer);

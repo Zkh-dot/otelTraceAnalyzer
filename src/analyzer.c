@@ -75,12 +75,16 @@ void ParceTrace(Analyzer* analyzer, Trace* trace) {
     free(tmpCounters);
 }
 
-void AnalyzeTrace(Analyzer* analyzer, Trace* trace) {
-    ParceTrace(analyzer, trace);
-    
+void RunPlugins(Analyzer* analyzer, Trace* trace) {
     for(int i = 0; i < pluginCount; i++) {
         pluginPtrs[i](analyzer, trace);
     }
+}
+
+void APIAnalyzeTraceObj(Analyzer* analyzer, Trace* trace) {
+    ParceTrace(analyzer, trace);
+
+    RunPlugins(analyzer, trace);
 
     if(!analyzer->storeTraces)
         FreeTrace(trace);
@@ -94,7 +98,7 @@ void APIAnalyzeTrace(
     ) {
     Trace* trace = (Trace*)malloc(sizeof(Trace));
     InitTrace(trace, traceString, serviceName, traceId);
-    AnalyzeTrace(analyzer, trace);
+    APIAnalyzeTraceObj(analyzer, trace);
 }
 
 ServiceErrorCounters* APIGetServiceErrorCounters(Analyzer* analyzer, const char* serviceName) {

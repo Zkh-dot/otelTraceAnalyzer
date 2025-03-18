@@ -1,14 +1,14 @@
 #include "py_translator.h"
 
-ServiceErrorCounters* PyCounters2Counters(PyObject* counters) {
-    return ((PyCounters*)counters)->_statusCounter;
+ServiceErrorCounters* PyCounters2Counters(PyObject* src) {
+    return ((PyCounters*)src)->_statusCounter;
 }
 
-PyObject* Counters2PyCounters(ServiceErrorCounters* counters) {
-    PyCounters* pyCounters = (PyCounters*)PyType_GenericAlloc(&PyCountersType, 0);
-    Py_INCREF(pyCounters);
-    setCounters4PyCounters(pyCounters, counters);
-    return (PyObject*)pyCounters;
+PyObject* Counters2PyCounters(PyCounters* dst, ServiceErrorCounters* src) {
+    // PyCounters* pyCounters = (PyCounters*)PyType_GenericAlloc(&PyCountersType, 0);
+    // Py_INCREF(pyCounters);
+    setCounters4PyCounters(dst, src);
+    return (PyObject*)dst;
 }
 
 // Span* PySpan2Span(PyObject* span) {
@@ -21,15 +21,15 @@ PyObject* Counters2PyCounters(ServiceErrorCounters* counters) {
 //     return (PyObject*)pySpan;
 // }
 
-Trace* PyTrace2Trace(PyObject* trace) {
-    return ((PyTrace*)trace)->_trace;
+Trace* PyTrace2Trace(PyObject* src) {
+    return ((PyTrace*)src)->_trace;
 }
 
-PyObject* Trace2PyTrace(Trace* trace) {
-    PyTrace* pyTrace = (PyTrace*)PyTrace_new(&PyTraceType, NULL, NULL);
-    Py_INCREF(pyTrace);
-    pyTrace->_trace = trace;
-    return (PyObject*)pyTrace;
+PyObject* Trace2PyTrace(PyTrace* dst, Trace* src) {
+    // PyTrace* pyTrace = (PyTrace*)PyTrace_new(&PyTraceType, NULL, NULL);
+    // Py_INCREF(pyTrace);
+    dst->_trace = src;
+    return (PyObject*)dst;
 }
 
 // Service* PyService2Service(PyObject* service) {

@@ -2,6 +2,8 @@
 
 void PyAnalyzer_dealloc(PyAnalyzer* self) {
     FreeAnalyzer(self->analyzer);
+    FreePyPluginManager((pyPluginManager*)self->pluginManager);
+    // Py_DECREF(self->pluginManager);
     Py_TYPE(self)->tp_free((PyObject*)self);
 }
 
@@ -15,12 +17,27 @@ PyObject* PyAnalyzer_new(PyTypeObject* type, PyObject* args, PyObject* kwds) {
             return NULL;
         }
         InitAnalyzer(self->analyzer);
+
+        self->pluginManager = PyType_GenericAlloc(&PyPluginManagerType, 0);
+        if (self->pluginManager == NULL) {
+            Py_DECREF(self);
+            return NULL;
+        }
+        InitPyPluginManager((pyPluginManager*)self->pluginManager);
     }
     return (PyObject*)self;
 }
 
 int PyAnalyzer_init(PyAnalyzer* self, PyObject* args, PyObject* kwds) {
     return 0;
+}
+
+void PyAnalyzeTrace(PyAnalyzer* self, Trace* trace) {
+    ParceTrace(self->analyzer, trace);
+    RunPlugins(self->analyzer, trace);
+    RunPyPlugins((pyPluginManager*)self->pluginManager, self->analyzer, trace);
+    if(!self->analyzer->storeTraces)
+        FreeTrace(trace);
 }
 
 PyObject* PyAPIAnalyzeTrace(PyAnalyzer* self, PyObject* args) {
@@ -30,13 +47,18 @@ PyObject* PyAPIAnalyzeTrace(PyAnalyzer* self, PyObject* args) {
     if (!PyArg_ParseTuple(args, "sss", &traceString, &serviceName, &traceId)) {
         return NULL;
     }
-    APIAnalyzeTrace(self->analyzer, traceString, serviceName, traceId);
+    Trace* trace = (Trace*)malloc(sizeof(Trace));
+    InitTrace(trace, traceString, serviceName, traceId);
+    PyAnalyzeTrace(self, trace);
+    // TODO: maybe, but better not
+    // if(self->analyzer->storeTraces)
+    //     _rupdateTrace(trace);
     Py_RETURN_NONE;
 }
 
 PyObject* PyAPIAnalyzeTraceBTrace(PyAnalyzer* self, PyTrace* trace) {
     _updateTrace(trace);
-    AnalyzeTrace(self->analyzer, trace->_trace);
+    PyAnalyzeTrace(self, trace->_trace);
     if(self->analyzer->storeTraces)
         _rupdateTrace(trace);
     Py_RETURN_NONE;
@@ -98,10 +120,12 @@ PyObject* PyAPIGetAllServiceErrorCountersObj(PyAnalyzer* self) {
     CountersArr* countersArr = APIGetAllServiceErrorCounters(self->analyzer);
     PyObject* dict = PyDict_New();
     for(int i = 0; i < countersArr->errorCountersCount; i++) {
+        PyObject* tmpCounters = PyType_GenericAlloc(&PyCountersType, 0);
+        Counters2PyCounters((PyCounters*)tmpCounters, countersArr->errorCounters[i]);
         PyDict_SetItemString(
             dict,
             countersArr->errorCounters[i]->serviceName,
-            Counters2PyCounters(countersArr->errorCounters[i])
+            tmpCounters
         );
     }
     return dict;
@@ -136,6 +160,11 @@ PyObject* PyAPIGetAllServiceObj(PyAnalyzer* self) {
     return list;
 }
 
+PyMemberDef PyAnalyzer_members[] = {
+    {"plg_manager", T_OBJECT_EX, offsetof(PyAnalyzer, pluginManager), 0, "Plugin manager object"},
+    {NULL}
+};
+
 PyMethodDef PyAnalyzer_methods[] = {
     {"analyze", (PyCFunction)PyAPIAnalyzeTrace, METH_VARARGS, "Analyze trace"},
     {"analyze_btrace", (PyCFunction)PyAPIAnalyzeTraceBTrace, METH_O, "Analyze trace by trace object"},
@@ -159,4 +188,5 @@ PyTypeObject PyAnalyzerType = {
     .tp_init = (initproc)PyAnalyzer_init,
     .tp_dealloc = (destructor)PyAnalyzer_dealloc,
     .tp_methods = PyAnalyzer_methods,
+    .tp_members = PyAnalyzer_members,
 };

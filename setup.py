@@ -5,7 +5,8 @@ import shutil, os
 
 SOURCE_FILES = [
     "src/analyzer.c",
-    "src/plugins.c",
+    
+    "src/plugin_manager.c",
     "src/plugins/example_plugin.c",
 
     "src/hashstructs/hashset_itr.c",
@@ -15,6 +16,7 @@ SOURCE_FILES = [
     "src/python_wrapper/py_structs.c",
     "src/python_wrapper/py_translator.c",
     "src/python_wrapper/py_analyzer.c",
+    "src/python_wrapper/py_plugin_manager.c",
 
     "src/python_wrapper/init_module.c",
 
@@ -51,7 +53,7 @@ class BuildExt(build_ext):
 
 setup(
     name="otelanalyzer",
-    version="0.1.2",
+    version="0.1.3",
     author="zkh-dot",
     author_email="kernzahar@gmail.com",
     python_requires=">=3.10",
@@ -64,5 +66,6 @@ setup(
     package_data={"otelanalyzer": ["*.c", "*.h", "*.pyi"]},
     cmdclass={"build_ext": BuildExt},
     long_description=open("README.md").read(),
+    long_description_content_type="text/markdown",
     ext_modules=ext_modules,
 )

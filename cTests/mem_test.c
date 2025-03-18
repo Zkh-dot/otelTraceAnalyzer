@@ -8,7 +8,7 @@ void analyze() {
     char* traceId = (char*)"traceId";
     Trace* trace = (Trace*)malloc(sizeof(Trace));
     InitTrace(trace, traceString, serviceName, traceId);
-    AnalyzeTrace(analyzer, trace);
+    APIAnalyzeTraceObj(analyzer, trace);
     ServiceErrorCounters* counters = APIGetServiceErrorCounters(analyzer, serviceName);
     FreeAnalyzer(analyzer);
     // free(counters);

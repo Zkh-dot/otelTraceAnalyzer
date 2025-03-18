@@ -1,3 +1,5 @@
+from typing import Callable
+
 class Counters:
     myBadTraceExamples: list[str]
     notmyBadTraceExamples: list[str]
@@ -10,6 +12,7 @@ class Counters:
     def __init__(self) -> None:
         ...
 class Analyzer:
+    plg_manager: PluginManager
     def __init__(self) -> None:
         ...
     def analyze(self, trace: str, service_name: str, trace_id: str) -> None:
@@ -41,4 +44,10 @@ class Service:
     serviceName: str
     errorCounters: Counters
     def __init__(self) -> None:
+        ...
+
+class PluginManager:
+    def __init__(self) -> None:
+        ...
+    def add_plugin(self, func: Callable) -> None:
         ...

@@ -5,10 +5,14 @@
 #include "../analyzer.h"
 #include "py_structs.h"
 #include "py_translator.h"
+#include "py_plugin_manager.h"
 
 typedef struct {
     PyObject_HEAD
     Analyzer* analyzer;
+    // TODO: what type? mb PyObject
+    PyObject* pluginManager;
+
 } PyAnalyzer;
 
 void PyAnalyzer_dealloc(PyAnalyzer* self);
@@ -36,6 +40,8 @@ PyObject* PyAPIGetServiceObj(PyAnalyzer* self, PyObject* args);
 PyObject* PyAPIGetAllServiceObj(PyAnalyzer* self);
 
 extern PyMethodDef PyAnalyzer_methods[9];
+
+extern PyMemberDef PyAnalyzer_members[2];
 
 extern PyTypeObject PyAnalyzerType;
 

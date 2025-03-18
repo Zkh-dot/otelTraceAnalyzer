@@ -24,7 +24,9 @@ Service* GetAddService(Analyzer* analyzer, const char* serviceName);
 
 void ParceTrace(Analyzer* analyzer, Trace* trace);
 
-void AnalyzeTrace(Analyzer* analyzer, Trace* trace);
+void RunPlugins(Analyzer* analyzer, Trace* trace);
+
+void APIAnalyzeTraceObj(Analyzer* analyzer, Trace* trace);
 
 void APIAnalyzeTrace(
     Analyzer* analyzer,
