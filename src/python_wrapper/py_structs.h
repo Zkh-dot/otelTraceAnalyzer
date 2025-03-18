@@ -30,6 +30,8 @@ int PyCounters_init(PyCounters* self, PyObject* args, PyObject* kwds);
 
 void _updateCounter(PyCounters* self);
 
+void _rupdateCounter(PyCounters* self);
+
 void setCounters4PyCounters(PyCounters* self, ServiceErrorCounters* counters);
 
 extern PyMethodDef PyCounters_methods[1];
@@ -37,6 +39,31 @@ extern PyMethodDef PyCounters_methods[1];
 extern PyMemberDef PyCounters_members[9];
 
 extern PyTypeObject PyCountersType;
+
+// span
+
+typedef struct {
+    PyObject_HEAD
+    Span* _span;
+    PyObject* spanId;
+    PyObject* serviceName;
+    PyObject* parentSpanId;
+    PyObject* traceId;
+} PySpan;
+
+void PySpan_dealloc(PySpan* self);
+
+PyObject* PySpan_new(PyTypeObject* type, PyObject* args, PyObject* kwds);
+
+int PySpan_init(PySpan* self, PyObject* args, PyObject* kwds);
+
+void _updateSpan(PySpan* self);
+
+extern PyMethodDef PySpan_methods[1];
+
+extern PyMemberDef PySpan_members[4];
+
+extern PyTypeObject PySpanType;
 
 // trace
 typedef struct {
@@ -46,6 +73,7 @@ typedef struct {
     PyObject* serviceName;
     PyObject* traceId;
     PyObject* spansCount;
+    PyObject* spansList;
 } PyTrace;
 
 void PyTrace_dealloc(PyTrace* self);
@@ -60,7 +88,7 @@ void _rupdateTrace(PyTrace* self);
 
 extern PyMethodDef PyTrace_methods[1];
 
-extern PyMemberDef PyTrace_members[5];
+extern PyMemberDef PyTrace_members[6];
 
 extern PyTypeObject PyTraceType;
 
@@ -86,15 +114,4 @@ extern PyMethodDef PyService_methods[1];
 
 extern PyMemberDef PyService_members[3];
 
-extern PyTypeObject PyServiceType;// = {
-//     PyVarObject_HEAD_INIT(NULL, 0)
-//     .tp_name = "pywrapper.Service",
-    // .tp_doc = "Service objects",
-//     .tp_basicsize = sizeof(PyService),
-//     .tp_itemsize = 0,
-//     .tp_flags = Py_TPFLAGS_DEFAULT,
-//     .tp_new = PyService_new,
-//     .tp_init = (initproc)PyService_init,
-//     .tp_dealloc = (destructor)PyService_dealloc,
-//     .tp_methods = PyService_methods,
-// };
+extern PyTypeObject PyServiceType;

@@ -1,4 +1,4 @@
-#include "plugins.h"
+#include "plugin_manager.h"
 
 // 1. increase this number when adding new plugins
 const int pluginCount = 0;
@@ -12,3 +12,5 @@ void (*pluginPtrs[])(Analyzer*, Trace*) = {
 };
 
 // 4. include your_plugin.c file in setup.py
+
+// TODO: do i need to free it?

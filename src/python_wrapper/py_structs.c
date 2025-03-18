@@ -60,6 +60,21 @@ void _updateCounter(PyCounters* self) {
     }
 }
 
+void _rupdateCounter(PyCounters* self) {
+    self->_statusCounter->badTraceCount =       (int)PyLong_AsLong(self->badTraceCount);
+    self->_statusCounter->mySpanCount =         (int)PyLong_AsLong(self->mySpanCount);
+    self->_statusCounter->traceCount =          (int)PyLong_AsLong(self->traceCount);
+    self->_statusCounter->myExamplesCount =     (int)PyLong_AsLong(self->myExamplesCount);
+    self->_statusCounter->notmyExamplesCount =  (int)PyLong_AsLong(self->notmyExamplesCount);
+
+    for (int i = 0; i < self->_statusCounter->myExamplesCount; i++) {
+        self->_statusCounter->myBadTraceExamples[i] = (char*)PyUnicode_AsUTF8(PyList_GetItem(self->myBadTraceExamples, i));
+    }
+    for (int i = 0; i < self->_statusCounter->notmyExamplesCount; i++) {
+        self->_statusCounter->notmyBadTraceExamples[i] = (char*)PyUnicode_AsUTF8(PyList_GetItem(self->notmyBadTraceExamples, i));
+    }
+}
+
 void setCounters4PyCounters(PyCounters* self, ServiceErrorCounters* counters) {
     self->_statusCounter = counters;
     _updateCounter(self);
@@ -144,6 +159,7 @@ PyMemberDef PyTrace_members[] = {
     {"serviceName", T_OBJECT_EX, offsetof(PyTrace, serviceName), 0, "Service name"},
     {"traceId", T_OBJECT_EX, offsetof(PyTrace, traceId), 0, "Trace ID"},
     {"spansCount", T_OBJECT_EX, offsetof(PyTrace, spansCount), 0, "Spans count"},
+    {"spansList", T_OBJECT_EX, offsetof(PyTrace, spansList), 0, "Spans list"},
     {NULL}
 };
 

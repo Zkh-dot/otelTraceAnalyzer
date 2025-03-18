@@ -1,5 +1,6 @@
 #include "py_analyzer.h"
 #include "py_structs.h"
+#include "py_plugin_manager.h"
 
 
 PyMODINIT_FUNC PyInit_otelanalyzer(void) {
@@ -19,6 +20,10 @@ PyMODINIT_FUNC PyInit_otelanalyzer(void) {
     }
 
     if (PyType_Ready(&PyServiceType) < 0) {
+        return NULL;
+    }
+
+    if(PyType_Ready(&PyPluginManagerType) < 0) {
         return NULL;
     }
 
@@ -52,6 +57,12 @@ PyMODINIT_FUNC PyInit_otelanalyzer(void) {
 
     PyObject* service_obj = (PyObject*)&PyServiceType;
     if(PyModule_AddObject(m, "Service", service_obj) < 0) {
+        Py_DECREF(m);
+        return NULL;
+    }
+
+    PyObject* plugin_manager_obj = (PyObject*)&PyPluginManagerType;
+    if(PyModule_AddObject(m, "PluginManager", plugin_manager_obj) < 0) {
         Py_DECREF(m);
         return NULL;
     }

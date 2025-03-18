@@ -8,17 +8,17 @@
 #include "../structures/servicemap.h"
 
 
-ServiceErrorCounters* PyCounters2Counters(PyObject* counters);
+ServiceErrorCounters* PyCounters2Counters(PyObject* src);
 
-PyObject* Counters2PyCounters(ServiceErrorCounters* counters);
+PyObject* Counters2PyCounters(PyCounters* dst, ServiceErrorCounters* src);
 
 // Span* PySpan2Span(PyObject* span);
 
 // PyObject* Span2PySpan(Span* span);
 
-Trace* PyTrace2Trace(PyObject* trace);
+Trace* PyTrace2Trace(PyObject* src);
 
-PyObject* Trace2PyTrace(Trace* trace);
+PyObject* Trace2PyTrace(PyTrace* dst, Trace* src);
 
 // Service* PyService2Service(PyObject* service);
 
