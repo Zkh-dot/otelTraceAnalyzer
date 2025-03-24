@@ -4,8 +4,6 @@
 #include <structmember.h>
 #include "../analyzer.h"
 #include "py_structs.h"
-#include "py_translator.h"
-#include "py_plugin_manager.h"
 
 typedef struct {
     PyObject_HEAD
@@ -20,8 +18,6 @@ void PyAnalyzer_dealloc(PyAnalyzer* self);
 PyObject* PyAnalyzer_new(PyTypeObject* type, PyObject* args, PyObject* kwds);
 
 int PyAnalyzer_init(PyAnalyzer* self, PyObject* args, PyObject* kwds);
-
-PyObject* PyGetServiceErrorCounters(PyAnalyzer* self, ServiceErrorCounters* counters);
 
 PyObject* PyAPIAnalyzeTrace(PyAnalyzer* self, PyObject* args);
 

@@ -1,6 +1,7 @@
 from typing import Callable
 
 class Counters:
+    statusCounters: list[int]
     myBadTraceExamples: list[str]
     notmyBadTraceExamples: list[str]
     myExamplesCount: int

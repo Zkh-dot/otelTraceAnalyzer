@@ -12,6 +12,7 @@ void PyCounters_dealloc(PyCounters* self) {
     Py_DECREF(self->badTraceCount);
     Py_DECREF(self->mySpanCount);
     Py_DECREF(self->traceCount);
+    Py_DECREF(self->statusCounter);
     Py_TYPE(self)->tp_free((PyObject*)self);
 }
 
@@ -20,6 +21,7 @@ PyObject* PyCounters_new(PyTypeObject* type, PyObject* args, PyObject* kwds) {
     self = (PyCounters*)type->tp_alloc(type, 0);
     if (self != NULL) {
         self->myBadTraceExamples = PyList_New(0);
+        self->statusCounter = PyDict_New();
         self->notmyBadTraceExamples = PyList_New(0);
         self->myExamplesCount = PyLong_FromLong(0);
         self->notmyExamplesCount = PyLong_FromLong(0);
@@ -44,6 +46,7 @@ void _updateCounter(PyCounters* self) {
 
     self->myBadTraceExamples = PyList_New(0);
     self->notmyBadTraceExamples = PyList_New(0);
+    self->statusCounter = PyDict_New();
 
     for (int i = 0; i < self->_statusCounter->myExamplesCount; i++) {
         PyList_Append(
@@ -57,6 +60,14 @@ void _updateCounter(PyCounters* self) {
     }
     for (int i = 0; i < self->_statusCounter->notmyExamplesCount; i++) {
         PyList_Append(self->notmyBadTraceExamples, Py_BuildValue("s", self->_statusCounter->notmyBadTraceExamples[i], strlen(self->_statusCounter->notmyBadTraceExamples[i])));
+    }
+    
+    for(int i = 0; i < TraceOk + 1; i++) {
+        PyDict_SetItem(
+            self->statusCounter,
+            Py_BuildValue("s", traceStatusMessage[i], strlen(traceStatusMessage[i])),
+            Py_BuildValue("i", self->_statusCounter->statusCounter[i])
+        );
     }
 }
 
@@ -72,6 +83,9 @@ void _rupdateCounter(PyCounters* self) {
     }
     for (int i = 0; i < self->_statusCounter->notmyExamplesCount; i++) {
         self->_statusCounter->notmyBadTraceExamples[i] = (char*)PyUnicode_AsUTF8(PyList_GetItem(self->notmyBadTraceExamples, i));
+    }
+    for (int i = 0; i < TraceOk + 1; i ++) {
+        self->_statusCounter->statusCounter[i] = (int)PyLong_AsLong(PyDict_GetItemString(self->statusCounter, traceStatusMessage[i]));
     }
 }
 
@@ -93,6 +107,7 @@ PyMemberDef PyCounters_members[] = {
     {"badTraceCount", T_OBJECT_EX, offsetof(PyCounters, badTraceCount), 0, "Bad trace count"},
     {"mySpanCount", T_OBJECT_EX, offsetof(PyCounters, mySpanCount), 0, "My span count"},
     {"traceCount", T_OBJECT_EX, offsetof(PyCounters, traceCount), 0, "Trace count"},
+    {"statusCounters", T_OBJECT_EX, offsetof(PyCounters, statusCounter), 0, "Trace count"},
     {NULL}
 };
 

@@ -1,4 +1,6 @@
 #include "py_analyzer.h"
+#include "py_translator.h"
+#include "py_plugin_manager.h"
 
 void PyAnalyzer_dealloc(PyAnalyzer* self) {
     FreeAnalyzer(self->analyzer);
@@ -64,34 +66,13 @@ PyObject* PyAPIAnalyzeTraceBTrace(PyAnalyzer* self, PyTrace* trace) {
     Py_RETURN_NONE;
 }
 
-PyObject* PyGetServiceErrorCounters(PyAnalyzer* self, ServiceErrorCounters* counters) {
-    PyObject* dict = PyDict_New();
-    for(int i = 0; i < TraceOk; i++) {
-        PyDict_SetItemString(dict, traceStatusMessage[i], PyLong_FromLong(counters->statusCounter[i]));
-    }
-    PyObject* myExamples = PyList_New(counters->myExamplesCount);
-    for(int i = 0; i < counters->myExamplesCount; i++) {
-        PyList_SetItem(myExamples, i, PyUnicode_FromString(counters->myBadTraceExamples[i]));
-    }
-    PyObject* notmyExamples = PyList_New(counters->notmyExamplesCount);
-    for(int i = 0; i < counters->notmyExamplesCount; i++) {
-        PyList_SetItem(notmyExamples, i, PyUnicode_FromString(counters->notmyBadTraceExamples[i]));
-    }
-    PyDict_SetItemString(dict, "myExamples", myExamples);
-    PyDict_SetItemString(dict, "notmyExamples", notmyExamples);
-    PyDict_SetItemString(dict, "badTraceCount", PyLong_FromLong(counters->badTraceCount));
-    PyDict_SetItemString(dict, "mySpanCount", PyLong_FromLong(counters->mySpanCount));
-    PyDict_SetItemString(dict, "traceCount", PyLong_FromLong(counters->traceCount));
-    return dict;
-}
-
 PyObject* PyAPIGetServiceErrorCounters(PyAnalyzer* self, PyObject* args) {
     const char* serviceName;
     if (!PyArg_ParseTuple(args, "s", &serviceName)) {
         return NULL;
     }
     ServiceErrorCounters* counters = APIGetServiceErrorCounters(self->analyzer, serviceName);
-    return PyGetServiceErrorCounters(self, counters);
+    return Counters2Dict(counters);
 }
 
 PyObject* PyAPIGetServiceErrorCountersObj(PyAnalyzer* self, PyObject* args) {
@@ -110,7 +91,7 @@ PyObject* PyAPIGetAllServiceErrorCounters(PyAnalyzer* self) {
     CountersArr* countersArr = APIGetAllServiceErrorCounters(self->analyzer);
     PyObject* dict = PyDict_New();
     for(int i = 0; i < countersArr->errorCountersCount; i++) {
-        PyObject* counters = PyGetServiceErrorCounters(self, countersArr->errorCounters[i]);
+        PyObject* counters = Counters2Dict(countersArr->errorCounters[i]);
         PyDict_SetItemString(dict, countersArr->errorCounters[i]->serviceName, counters);
     }
     return dict;

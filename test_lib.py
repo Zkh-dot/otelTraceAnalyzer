@@ -6,6 +6,7 @@ def lambda_func(d: dict[str, Counters], t: Trace):
     print("wow!")
     d["some-name"].mySpanCount = 9999999
     d["some-name"].myBadTraceExamples.append("pipa")
+    d["some-name"].statusCounters["myNoParentInTrace"] = 10
     d["some-name"].myExamplesCount += 1
     return d
 
@@ -38,7 +39,7 @@ def testCounters(a: Analyzer, t: str):
     tr.serviceName = "some-name"
     a.analyze_btrace(tr)
     r = a.get_counters_obj('some-name')
-    print(r.mySpanCount)
+    print(type(r.statusCounters), r.statusCounters)
     
 
 def testAllCounters(a: Analyzer, t: str):
@@ -84,6 +85,7 @@ if __name__ == '__main__':
     a = Analyzer()
     # test(a, t)
     # testTrace(a, t)
+    # testCounters(a, t)
     # testCounters(a, t)
     # testAllCounters(a, t)
     # test_service(a, t)

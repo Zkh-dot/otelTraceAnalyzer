@@ -71,6 +71,8 @@ void ParceTrace(Analyzer* analyzer, Trace* trace) {
     if(!IsRootSpanError(tmpCounters)) {
         sumCounters(myService->errorCounters, tmpCounters);
         AppendExample(myService->errorCounters, trace->traceId, 1);
+    } else {
+            IncCounters(myService->errorCounters, SpanOk, true);
     }
     free(tmpCounters);
 }

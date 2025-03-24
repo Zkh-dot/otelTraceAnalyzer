@@ -83,3 +83,5 @@ CTestTestfile.cmake
 *egg-info/*
 
 dist/*
+
+.clangd

@@ -1,7 +1,7 @@
 #include "counters.h"
 
 void InitServiceErrorCounters(ServiceErrorCounters* counters) {
-    for(int i = 0; i < TraceOk; i++) {
+    for(int i = 0; i < TraceOk + 1; i++) {
         counters->statusCounter[i] = 0;
     }
     for(int i = 0; i < EXAMPLES_LENGTH; i++) {
@@ -88,7 +88,7 @@ bool IsRootSpanError(ServiceErrorCounters* errorCounters) {
     for(int i = 0; i < TraceOk; i++) {
         changed += errorCounters->statusCounter[i];
     }
-    return (changed == 1) && errorCounters->statusCounter[myMissingParent] == 1;
+    return ((changed == 1) && errorCounters->statusCounter[myMissingParent] == 1) || changed == 0;
 }
 
 void FreeCountersArr(CountersArr* countersArr) {

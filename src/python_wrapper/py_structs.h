@@ -12,6 +12,7 @@
 typedef struct {
     PyObject_HEAD
     ServiceErrorCounters* _statusCounter;
+    PyObject* statusCounter;
     PyObject* myBadTraceExamples;
     PyObject* notmyBadTraceExamples;
     PyObject* myExamplesCount;
@@ -36,7 +37,7 @@ void setCounters4PyCounters(PyCounters* self, ServiceErrorCounters* counters);
 
 extern PyMethodDef PyCounters_methods[1];
 
-extern PyMemberDef PyCounters_members[9];
+extern PyMemberDef PyCounters_members[10];
 
 extern PyTypeObject PyCountersType;
 
