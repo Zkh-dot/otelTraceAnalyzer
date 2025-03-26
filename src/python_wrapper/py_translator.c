@@ -15,22 +15,31 @@ PyObject* Counters2PyCounters(PyCounters* dst, ServiceErrorCounters* src) {
 
 PyObject* Counters2Dict(ServiceErrorCounters* counters) {
     PyObject* dict = PyDict_New();
+    printf("%d\n", PyDict_Check(dict)); // to delete
     for(int i = 0; i < TraceOk + 1; i++) {
         PyDict_SetItemString(dict, traceStatusMessage[i], PyLong_FromLong(counters->statusCounter[i]));
     }
-    PyObject* myExamples = PyList_New(counters->myExamplesCount);
-    for(int i = 0; i < counters->myExamplesCount; i++) {
-        PyList_SetItem(myExamples, i, PyUnicode_FromString(counters->myBadTraceExamples[i]));
-    }
-    PyObject* notmyExamples = PyList_New(counters->notmyExamplesCount);
-    for(int i = 0; i < counters->notmyExamplesCount; i++) {
-        PyList_SetItem(notmyExamples, i, PyUnicode_FromString(counters->notmyBadTraceExamples[i]));
-    }
-    PyDict_SetItemString(dict, "myExamples", myExamples);
-    PyDict_SetItemString(dict, "notmyExamples", notmyExamples);
+    // printf("%d\n", PyDict_Check(dict)); // to delete
+
+
+    // TODO: fix
+    // PyObject* myExamples = PyList_New(counters->myExamplesCount);
+    // for(int i = 0; i < counters->myExamplesCount; i++) {
+    //     PyList_SetItem(myExamples, i, PyUnicode_FromString(counters->myBadTraceExamples[i]));
+    // }
+    // printf("%d\n", PyDict_Check(dict)); // to delete
+    // PyObject* notmyExamples = PyList_New(counters->notmyExamplesCount);
+    // for(int i = 0; i < counters->notmyExamplesCount; i++) {
+    //     PyList_SetItem(notmyExamples, i, PyUnicode_FromString(counters->notmyBadTraceExamples[i]));
+    // }
+    // printf("%d\n", PyDict_Check(dict)); // to delete
+    // PyDict_SetItemString(dict, "myExamples", myExamples);
+    // PyDict_SetItemString(dict, "notmyExamples", notmyExamples);
     PyDict_SetItemString(dict, "badTraceCount", PyLong_FromLong(counters->badTraceCount));
     PyDict_SetItemString(dict, "mySpanCount", PyLong_FromLong(counters->mySpanCount));
     PyDict_SetItemString(dict, "traceCount", PyLong_FromLong(counters->traceCount));
+    printf("%d\n", PyDict_Check(dict)); // to delete
+    
     return dict;
 }
 

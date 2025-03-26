@@ -21,26 +21,6 @@ const char* traceStatusMessage[TraceOk + 1] = {
     "TraceOk",
 };
 
-char *LongStrTok(char *input, const char *delimiter) {
-    static char *string;
-    if (input != NULL) {
-        string = strdup(input);
-    }
-    if (string == NULL)
-        return string;
-
-    char *end = strstr(string, delimiter);
-    if (end == NULL) {
-        char *temp = string;
-        string = NULL;
-        return temp;
-    }
-
-    *end = '\0';
-    string = end + strlen(delimiter);
-    return string;
-}
-
 int CountSpans(const char* trace) {
     int count = 0;
     const char *spanId_key = "'spanId': '";
@@ -100,33 +80,47 @@ char* ScanTrace(const char *field, const char *trace) {
     return value;
 }
 
+void SplitTrace(char *input, const char *delimiter, int spanCount, char** result) {
+    char *current = input;
+    result[0] = current;
+
+    for (int i = 0; i < spanCount; i++) {
+        char *delim_pos = strstr(current, delimiter);
+        if (delim_pos == NULL) {
+            break;
+        }
+        *delim_pos = '\0';
+
+        current = delim_pos + strlen(delimiter);
+        result[i + 1] = current;
+    }
+}
+
 void FindAllSpans(Trace* trace) {
     trace->spansCount = CountSpans(trace->traceString);
     trace->spans = (Span**)malloc(trace->spansCount * sizeof(Span*));
+    printf("trace: %s\n", trace->traceString);
     
     const char* Delimiter = "}, {";
-    char* tempCopy = strdup(trace->traceString);
-    char* token = LongStrTok(tempCopy, Delimiter);
-    int i = 0;
-    while (token != NULL && i < trace->spansCount) {
-        char* spanId = ScanTrace(SPAN_ID_KEY, token);
-        char* serviceName = ScanTrace(SERVICE_NAME_KEY, token);
-        char* spanParentId = ScanTrace(PARENT_SPAN_ID_KEY, token);
+    // char* tempCopy = strdup(trace->traceString);
+    char** chunkPtrs = malloc((trace->spansCount) * sizeof(char*));
+    SplitTrace(trace->traceString, Delimiter, trace->spansCount, chunkPtrs);
+    for(int i = 0; i < trace->spansCount; i++) {
+        char* spanId = ScanTrace(SPAN_ID_KEY, chunkPtrs[i]);
+        char* serviceName = ScanTrace(SERVICE_NAME_KEY, chunkPtrs[i]);
+        char* spanParentId = ScanTrace(PARENT_SPAN_ID_KEY, chunkPtrs[i]);
         Span* span = (Span*)malloc(sizeof(Span));
         InitSpan(span, spanId, serviceName, spanParentId, NULL);
         trace->spans[i] = span;
         if(hashset_is_member(trace->spanIds, trace->spans[i]->spanId) == 0)
             hashset_add(trace->spanIds, trace->spans[i]->spanId);
-        i++;
-        free(token);
-        token = LongStrTok(NULL, Delimiter);
+        
         free(spanId);
         free(serviceName);
         free(spanParentId);
     }
-    free(token);
-    free(tempCopy);
     free(trace->traceString);
+    free(chunkPtrs);
     trace->traceString = NULL;
 }
 

@@ -72,7 +72,11 @@ PyObject* PyAPIGetServiceErrorCounters(PyAnalyzer* self, PyObject* args) {
         return NULL;
     }
     ServiceErrorCounters* counters = APIGetServiceErrorCounters(self->analyzer, serviceName);
-    return Counters2Dict(counters);
+    PyObject* dict = Counters2Dict(counters);
+    printf("%d\n", PyDict_Check(dict)); // to delete
+    if(!PyDict_Check(dict))
+        return NULL;
+    return dict;
 }
 
 PyObject* PyAPIGetServiceErrorCountersObj(PyAnalyzer* self, PyObject* args) {

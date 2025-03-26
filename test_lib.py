@@ -80,7 +80,8 @@ def test_plugin(a: Analyzer, t: str):
     a.plg_manager.add_plugin(lambda_func)
 
 if __name__ == '__main__':
-    t = "[{'spanId': '0000000000000000', 'serviceName': 'some-name', 'traceId': '00000000000000000000000000000000', 'project': 'some-project', 'service': 'some-service'}]"
+    
+    t = "[{'spanId': '0000000000000000', 'serviceName': 'some-name', 'traceId': '00000000000000000000000000000000', 'project': 'some-project', 'service': 'some-service'}, {'spanId': '0000000000000001', 'serviceName': 'some-name', 'traceId': '00000000000000000000000000000000', 'parentSpanId': '0000000000000000' 'project': 'some-project', 'service': 'some-service'}, {'spanId': '0000000000000002', 'serviceName': 'some-name', 'traceId': '00000000000000000000000000000000', 'parentSpanId': '0000000000000003' 'project': 'some-project', 'service': 'some-service'}]"
     # t = "[{'spanId': '0000000000000000', 'serviceName': 'some-name', 'parentSpanId': '0000000000000000', 'traceId': '00000000000000000000000000000000', 'project': 'some-project', 'service': 'some-service'}]"
     a = Analyzer()
     # test(a, t)
@@ -90,5 +91,5 @@ if __name__ == '__main__':
     # testAllCounters(a, t)
     # test_service(a, t)
     # test_all_services(a, t)
-    test_plugin(a, t)
+    # test_plugin(a, t)
     testTrace(a, t)

@@ -12,7 +12,7 @@ for PYBIN in /opt/python/*/bin; do
     "${PYBIN}/pip" wheel /io/ -w /io/dist/
     i=$((i+1))
     if [ $i -eq 3 ]; then
-        break
+         break
     fi
 done
 
