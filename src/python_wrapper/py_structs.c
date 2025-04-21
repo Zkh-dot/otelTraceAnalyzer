@@ -212,7 +212,12 @@ void setService4PyService(PyService* self, Service* service) {
     setCounters4PyCounters(self->errorCounters, service->errorCounters);
 }
 
+PyObject* isPyServiceOk(PyService* self) {
+    return PyObject_IsTrue(self->errorCounters->badTraceCount) == 0 ? Py_True : Py_False;
+}
+
 PyMethodDef PyService_methods[] = {
+    {"is_ok", (PyCFunction)isPyServiceOk, METH_NOARGS, "Check if service is ok"},
     {NULL}
 };
 

@@ -45,6 +45,8 @@ class Service:
     errorCounters: Counters
     def __init__(self) -> None:
         ...
+    def is_ok(self) -> bool:
+        ...
 
 class PluginManager:
     def __init__(self) -> None:

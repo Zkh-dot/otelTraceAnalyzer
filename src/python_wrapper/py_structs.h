@@ -110,7 +110,9 @@ void _updateService(PyService* self);
 
 void setService4PyService(PyService* self, Service* service);
 
-extern PyMethodDef PyService_methods[1];
+PyObject* isPyServiceOk(PyService* self);
+
+extern PyMethodDef PyService_methods[2];
 
 extern PyMemberDef PyService_members[3];
 

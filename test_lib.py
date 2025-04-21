@@ -2,13 +2,6 @@ from otelanalyzer import *
 import json
 
 
-def lambda_func(d: dict[str, Counters], t: Trace):
-    print("wow!")
-    d["some-name"].mySpanCount = 9999999
-    d["some-name"].myBadTraceExamples.append("pipa")
-    d["some-name"].myExamplesCount += 1
-    return d
-
 def test(a: Analyzer, t: str = "", i: int = 0):
     t_id = "0" * 31 + str(i)
     if t == "":
@@ -75,18 +68,30 @@ def test_all_services(a: Analyzer, t: str):
         print(service.errorCounters.mySpanCount)
         print(service.serviceName)
 
-def test_plugin(a: Analyzer, t: str):
-    a.plg_manager.add_plugin(lambda_func)
+
+def lambda_func(d: dict[str, Counters], t: Trace):
+    print("wow!")
+    d["some-name"].mySpanCount = 9999999
+    d["some-name"].myBadTraceExamples.append("pipa")
+    d["some-name"].myExamplesCount += 1
+    return d
+
+
+def lambda_func_2(d: dict[str, Counters], t: Trace):
+    d["some-name"].badTraceCount = 8888
+    d["some-name"].myBadTraceExamples.append("pupa")
+    d["some-name"].myExamplesCount += 1
+    return d
 
 if __name__ == '__main__':
     t = "[{'spanId': '0000000000000000', 'serviceName': 'some-name', 'traceId': '00000000000000000000000000000000', 'project': 'some-project', 'service': 'some-service'}]"
-    # t = "[{'spanId': '0000000000000000', 'serviceName': 'some-name', 'parentSpanId': '0000000000000000', 'traceId': '00000000000000000000000000000000', 'project': 'some-project', 'service': 'some-service'}]"
     a = Analyzer()
-    # test(a, t)
-    # testTrace(a, t)
-    # testCounters(a, t)
-    # testAllCounters(a, t)
-    # test_service(a, t)
-    # test_all_services(a, t)
-    test_plugin(a, t)
-    testTrace(a, t)
+    a.plg_manager.add_plugin(lambda_func)
+    a.plg_manager.add_plugin(lambda_func_2)
+
+    traceId = "1" * 32
+    a.analyze(t, 'some-name', traceId)
+    r = a.get_counters('some-name')
+    
+    print(json.dumps(r, indent=4))
+    print(a.get_service('some-name').is_ok())

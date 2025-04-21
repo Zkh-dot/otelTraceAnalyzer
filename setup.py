@@ -5,7 +5,7 @@ import shutil, os
 
 SOURCE_FILES = [
     "src/analyzer.c",
-    
+
     "src/plugin_manager.c",
     "src/plugins/example_plugin.c",
 
@@ -53,7 +53,7 @@ class BuildExt(build_ext):
 
 setup(
     name="otelanalyzer",
-    version="0.1.3",
+    version="1.0.1",
     author="zkh-dot",
     author_email="kernzahar@gmail.com",
     python_requires=">=3.10",
