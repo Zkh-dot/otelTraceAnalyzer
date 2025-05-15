@@ -72,7 +72,7 @@ void ParceTrace(Analyzer* analyzer, Trace* trace) {
         sumCounters(myService->errorCounters, tmpCounters);
         AppendExample(myService->errorCounters, trace->traceId, 1);
     }
-    free(tmpCounters);
+    FreeServiceErrorCounters(tmpCounters);
 }
 
 void RunPlugins(Analyzer* analyzer, Trace* trace) {
@@ -103,6 +103,10 @@ void APIAnalyzeTrace(
 
 ServiceErrorCounters* APIGetServiceErrorCounters(Analyzer* analyzer, const char* serviceName) {
     Service* service = FindService(analyzer->serviceMap, serviceName);
+    if(service == NULL) {
+        Service* temp_new = AddNewService(analyzer->serviceMap, serviceName);
+        return temp_new->errorCounters;
+    }
     ServiceErrorCounters* counters = service->errorCounters;
     return counters;
 }
@@ -117,7 +121,7 @@ CountersArr* APIGetAllServiceErrorCounters(Analyzer* analyzer) {
     while((hashmap_iter(analyzer->serviceMap, &iter, &item))) {
         e = (struct StringToService*)item;
         counters[counter] = e->service->errorCounters;
-        counters[counter]->serviceName = e->string;
+        counters[counter]->serviceName = strdup(e->string);
         counter++;
     }
     arr->errorCounters = counters;

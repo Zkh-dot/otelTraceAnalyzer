@@ -33,7 +33,7 @@ ext_modules = [
         sources=SOURCE_FILES,
         include_dirs=["."],
         language="c",
-        extra_compile_args=["-std=c2x"],
+        # extra_compile_args=["-std=c2x"], # -std=c2x
     )
 ]
 

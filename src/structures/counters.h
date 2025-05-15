@@ -3,7 +3,7 @@
 #include "config.h"
 #include <stdlib.h>
 #include <stdbool.h>
-
+#include <string.h>
 typedef enum {
     UndefSpanStatus,
     MissingParent,
@@ -62,7 +62,7 @@ void IncCounters(ServiceErrorCounters* errorCounters, SpanStatusTypes status, bo
 
 void DecCounters(ServiceErrorCounters* errorCounters, SpanStatusTypes status, bool isMy);
 
-void AppendExample(ServiceErrorCounters* errorCounters, char* traceId, bool isMy);
+void AppendExample(ServiceErrorCounters* errorCounters, const char* traceId, bool isMy);
 
 bool IsRootSpanError(ServiceErrorCounters* errorCounters);
 

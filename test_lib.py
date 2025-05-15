@@ -86,8 +86,8 @@ def lambda_func_2(d: dict[str, Counters], t: Trace):
 if __name__ == '__main__':
     t = "[{'spanId': '0000000000000000', 'serviceName': 'some-name', 'traceId': '00000000000000000000000000000000', 'project': 'some-project', 'service': 'some-service'}]"
     a = Analyzer()
-    a.plg_manager.add_plugin(lambda_func)
-    a.plg_manager.add_plugin(lambda_func_2)
+    # a.plg_manager.add_plugin(lambda_func)
+    # a.plg_manager.add_plugin(lambda_func_2)
 
     traceId = "1" * 32
     a.analyze(t, 'some-name', traceId)

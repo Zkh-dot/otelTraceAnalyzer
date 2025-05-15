@@ -16,6 +16,12 @@ void InitServiceErrorCounters(ServiceErrorCounters* counters) {
 }
 
 void FreeServiceErrorCounters(ServiceErrorCounters* counters) {
+    for(int i = 0; i < counters->myExamplesCount; i++) {
+        free(counters->myBadTraceExamples[i]);
+    }
+    for(int i = 0; i < counters->notmyExamplesCount; i++) {
+        free(counters->notmyBadTraceExamples[i]);
+    }
     free(counters);
 }
 
@@ -48,6 +54,8 @@ void IncCounters(ServiceErrorCounters* errorCounters, SpanStatusTypes status, bo
 }
 
 void DecCounters(ServiceErrorCounters* errorCounters, SpanStatusTypes status, bool isMy) {
+    // TODO: it can be better, we do not diffirentiate between reason of example
+    free(errorCounters->myBadTraceExamples[--errorCounters->myExamplesCount]);
     switch (status)
     {
     case MissingParent:
@@ -69,15 +77,15 @@ void DecCounters(ServiceErrorCounters* errorCounters, SpanStatusTypes status, bo
     }
 }
 
-void AppendExample(ServiceErrorCounters* errorCounters, char* traceId, bool isMy) {
+void AppendExample(ServiceErrorCounters* errorCounters, const char* traceId, bool isMy) {
     if(isMy) {
         if(errorCounters->myExamplesCount < EXAMPLES_LENGTH) {
-            errorCounters->myBadTraceExamples[errorCounters->myExamplesCount] = traceId;
+            errorCounters->myBadTraceExamples[errorCounters->myExamplesCount] = strdup(traceId);
             errorCounters->myExamplesCount++;
         }
     } else {
         if(errorCounters->notmyExamplesCount < EXAMPLES_LENGTH) {
-            errorCounters->notmyBadTraceExamples[errorCounters->notmyExamplesCount] = traceId;
+            errorCounters->notmyBadTraceExamples[errorCounters->notmyExamplesCount] = strdup(traceId);
             errorCounters->notmyExamplesCount++;
         }
     }

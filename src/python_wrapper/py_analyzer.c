@@ -66,6 +66,9 @@ PyObject* PyAPIAnalyzeTraceBTrace(PyAnalyzer* self, PyTrace* trace) {
 
 PyObject* PyGetServiceErrorCounters(PyAnalyzer* self, ServiceErrorCounters* counters) {
     PyObject* dict = PyDict_New();
+    if(counters == NULL) {
+        return dict;
+    }
     for(int i = 0; i < TraceOk; i++) {
         PyDict_SetItemString(dict, traceStatusMessage[i], PyLong_FromLong(counters->statusCounter[i]));
     }
@@ -112,6 +115,9 @@ PyObject* PyAPIGetAllServiceErrorCounters(PyAnalyzer* self) {
     for(int i = 0; i < countersArr->errorCountersCount; i++) {
         PyObject* counters = PyGetServiceErrorCounters(self, countersArr->errorCounters[i]);
         PyDict_SetItemString(dict, countersArr->errorCounters[i]->serviceName, counters);
+        if(i == countersArr->errorCountersCount - 1) {
+            return dict;
+        }
     }
     return dict;
 }
