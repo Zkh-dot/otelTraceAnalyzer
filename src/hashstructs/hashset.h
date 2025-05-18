@@ -18,6 +18,7 @@
 #ifndef HASHSET_H
 #define HASHSET_H 1
 
+#include <stdint.h>
 #include <stdlib.h>
 
 #ifdef __cplusplus
@@ -51,7 +52,7 @@ extern "C" {
      *
      * returns zero if the item already in the set and non-zero otherwise
      */
-    int hashset_add(hashset_t set, void *item);
+    int hashset_add(hashset_t set, size_t value);
 
     /* remove item from the hashset
      *
@@ -64,7 +65,9 @@ extern "C" {
      *
      * returns non-zero if the item exists and zero otherwise
      */
-    int hashset_is_member(hashset_t set, void *item);
+    int hashset_is_member(hashset_t set, size_t value);
+
+    uint64_t hash16digits(const char *str);
 
 #ifdef __cplusplus
 }

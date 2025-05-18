@@ -54,14 +54,14 @@
      free(set);
  }
  
- static int hashset_add_member(hashset_t set, void *item)
+ static int hashset_add_member(hashset_t set, size_t value)
  {
-     size_t value = (size_t)item;
+    //  size_t value = (size_t)item;
      size_t ii;
  
-     if (value == 0 || value == 1) {
-         return -1;
-     }
+    //  if (value == 0 || value == 1) {
+    //      return -1;
+    //  }
  
      ii = set->mask & (prime_1 * value);
  
@@ -98,15 +98,15 @@
          set->n_deleted_items = 0;
          assert(set->items);
          for (ii = 0; ii < old_capacity; ii++) {
-             hashset_add_member(set, (void *)old_items[ii]);
+             hashset_add_member(set, old_items[ii]);
          }
          free(old_items);
      }
  }
  
- int hashset_add(hashset_t set, void *item)
+ int hashset_add(hashset_t set, size_t value)
  {
-     int rv = hashset_add_member(set, item);
+     int rv = hashset_add_member(set, value);
      maybe_rehash(set);
      return rv;
  }
@@ -129,9 +129,9 @@
      return 0;
  }
  
- int hashset_is_member(hashset_t set, void *item)
+ int hashset_is_member(hashset_t set, size_t value)
  {
-     size_t value = (size_t)item;
+    //  size_t value = (size_t)item;
      size_t ii = set->mask & (prime_1 * value);
  
      while (set->items[ii] != 0) {
@@ -143,4 +143,12 @@
      }
      return 0;
  }
- 
+
+ uint64_t hash16digits(const char *str) {
+    uint64_t t = 0;
+    for(int i = 0; i < 16; i++) {
+        t <<= 4;
+        t |= str[i] - '0';
+    }
+    return t;
+}

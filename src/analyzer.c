@@ -41,12 +41,14 @@ void ParceTrace(Analyzer* analyzer, Trace* trace) {
     InitServiceErrorCounters(tmpCounters);
     for(int i = 0; i < trace->spansCount; i++) {
         bool isMy = strcmp(trace->serviceName, trace->spans[i]->serviceName) == 0;
+        printf("%s, %s, %s\n", trace->serviceName, trace->spans[i]->serviceName, trace->spans[i]->spanId);
         myService->errorCounters->mySpanCount += isMy;
         if(trace->spans[i]->parentSpanId == NULL) {
             trace->spans[i]->spanStatus = MissingParent;
             badSpanCount++;
         } else {
-            if(!hashset_is_member(trace->spanIds, trace->spans[i]->parentSpanId)) {
+            printf("check parent: '%s', %d\n", trace->spans[i]->parentSpanId, hashset_is_member(trace->spanIds, hash16digits(trace->spans[i]->parentSpanId)));
+            if(!hashset_is_member(trace->spanIds, hash16digits(trace->spans[i]->parentSpanId))) {
                 trace->spans[i]->spanStatus = NoParentInTrace;
                 badSpanCount++;
             }
@@ -59,10 +61,12 @@ void ParceTrace(Analyzer* analyzer, Trace* trace) {
             continue;
         }
         if(isMy) {
+            printf("My service: %s, spanId: %s, status: %s\n", trace->spans[i]->serviceName, trace->spans[i]->spanId, spanStatusMessage[trace->spans[i]->spanStatus]);
             IncCounters(tmpCounters, trace->spans[i]->spanStatus, isMy);
             AppendExample(tmpCounters, trace->traceId, isMy);
             tmpCounters->badTraceCount++;
         } else {
+            printf("Not my service: %s, spanId: %s, status: %s\n", trace->spans[i]->serviceName, trace->spans[i]->spanId, spanStatusMessage[trace->spans[i]->spanStatus]);
             Service* notmyService = GetAddService(analyzer, trace->spans[i]->serviceName);
             IncCounters(notmyService->errorCounters, trace->spans[i]->spanStatus, isMy);
             AppendExample(notmyService->errorCounters, trace->traceId, isMy);

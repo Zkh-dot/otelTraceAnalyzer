@@ -125,8 +125,9 @@ void FindAllSpans(Trace* trace) {
             Span* span = (Span*)malloc(sizeof(Span));
             InitSpan(span, spanId, serviceName, spanParentId, NULL);
             trace->spans[i] = span;
-            if(hashset_is_member(trace->spanIds, trace->spans[i]->spanId) == 0)
-                hashset_add(trace->spanIds, trace->spans[i]->spanId);
+            // if(hashset_is_member(trace->spanIds, trace->spans[i]->spanId) == 0)
+            hashset_add(trace->spanIds, hash16digits(trace->spans[i]->spanId));
+            printf("add spanId: %s, %d\n", trace->spans[i]->spanId, hashset_is_member(trace->spanIds, hash16digits(trace->spans[i]->spanId)));
             free(spanId);
             free(serviceName);
         }
@@ -137,7 +138,7 @@ void FindAllSpans(Trace* trace) {
             break;
         }
         tempCopy = token;
-        token = LongStrTok(NULL, Delimiter);
+        token = LongStrTok(token, Delimiter);
     }
     trace->spansCount = i + 1;
 

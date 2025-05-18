@@ -1,0 +1,40 @@
+{
+    "some-name": {
+        "UndefTraceStatus": 0,
+        "myMissingParent": 0,
+        "notmyMissingParent": 0,
+        "myNoParentInTrace": 0,
+        "notmyNoParentInTrace": 0,
+        "myDublicateSpan": 0,
+        "notmyDublicateSpan": 0,
+        "myBadSpanIdSize": 0,
+        "notmyBadSpanIdSize": 0,
+        "myBadTraceIdSize": 0,
+        "notmyBadTraceIdSize": 0,
+        "myExamples": [],
+        "notmyExamples": [],
+        "badTraceCount": 0,
+        "mySpanCount": 2,
+        "traceCount": 1
+    },
+    "some.new.service": {
+        "UndefTraceStatus": 0,
+        "myMissingParent": 0,
+        "notmyMissingParent": 0,
+        "myNoParentInTrace": 0,
+        "notmyNoParentInTrace": 1,
+        "myDublicateSpan": 0,
+        "notmyDublicateSpan": 0,
+        "myBadSpanIdSize": 0,
+        "notmyBadSpanIdSize": 0,
+        "myBadTraceIdSize": 0,
+        "notmyBadTraceIdSize": 0,
+        "myExamples": [],
+        "notmyExamples": [
+            "00000000000000000000000000000000"
+        ],
+        "badTraceCount": 0,
+        "mySpanCount": 0,
+        "traceCount": 0
+    }
+}

@@ -23,7 +23,7 @@ void InitSpan(
     else
         span->parentSpanId = NULL;
     span->parentSpan = parentSpan;
-    span->spanStatus = UndefSpanStatus;
+    span->spanStatus = SpanOk;
 }
 
 void FreeSpan(Span* span) {

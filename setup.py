@@ -53,7 +53,7 @@ class BuildExt(build_ext):
 
 setup(
     name="otelanalyzer",
-    version="1.0.1",
+    version="1.0.2",
     author="zkh-dot",
     author_email="kernzahar@gmail.com",
     python_requires=">=3.10",
