@@ -53,7 +53,7 @@ class BuildExt(build_ext):
 
 setup(
     name="otelanalyzer",
-    version="1.0.2",
+    version="1.0.5",
     author="zkh-dot",
     author_email="kernzahar@gmail.com",
     python_requires=">=3.10",
@@ -63,7 +63,8 @@ setup(
         'License :: OSI Approved :: MIT License',  # License type
         'Operating System :: POSIX :: Linux',
     ],
-    package_data={"otelanalyzer": ["*.c", "*.h", "*.pyi"]},
+    package_data={"otelanalyzer": ["*.c", "*.h", "*.pyi", "py.typed"]},
+    zip_safe=False,
     cmdclass={"build_ext": BuildExt},
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",

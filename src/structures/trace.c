@@ -3,6 +3,8 @@
 const char* traceStatusMessage[TraceOk + 1] = {
     "UndefTraceStatus",
 
+    "noServiceNameSpan",
+
     "myMissingParent",
     "notmyMissingParent",
 
@@ -121,19 +123,18 @@ void FindAllSpans(Trace* trace) {
         char* spanId = ScanTrace(SPAN_ID_KEY, tempCopy);
         char* serviceName = ScanTrace(SERVICE_NAME_KEY, tempCopy);
         char* spanParentId = ScanTrace(PARENT_SPAN_ID_KEY, tempCopy);
-        if(spanId != NULL && serviceName != NULL) {
-            Span* span = (Span*)malloc(sizeof(Span));
-            InitSpan(span, spanId, serviceName, spanParentId, NULL);
-            trace->spans[i] = span;
-            // if(hashset_is_member(trace->spanIds, trace->spans[i]->spanId) == 0)
-            hashset_add(trace->spanIds, hash16digits(trace->spans[i]->spanId));
-            printf("add spanId: %s, %d\n", trace->spans[i]->spanId, hashset_is_member(trace->spanIds, hash16digits(trace->spans[i]->spanId)));
-            free(spanId);
-            free(serviceName);
-        }
-        if(spanParentId != NULL){
-            free(spanParentId);
-        }    
+
+        Span* span = (Span*)malloc(sizeof(Span));
+        InitSpan(span, spanId != NULL ? spanId : "0000000000000000", serviceName != NULL ? serviceName : "", spanParentId, NULL);
+        trace->spans[i] = span;
+        // if(hashset_is_member(trace->spanIds, trace->spans[i]->spanId) == 0)
+        hashset_add(trace->spanIds, hash16digits(trace->spans[i]->spanId));
+        if(serviceName == NULL) span->spanStatus = NoServivceName;
+
+        if(spanId != NULL) free(spanId);
+        if(serviceName != NULL) free(serviceName);
+        if(spanParentId != NULL) free(spanParentId);
+
         if (token == NULL) {
             break;
         }

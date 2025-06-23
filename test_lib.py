@@ -85,13 +85,15 @@ def lambda_func_2(d: dict[str, Counters], t: Trace):
 
 if __name__ == '__main__':
     t = "[{'spanId': '0000000000000000', 'serviceName': 'some-name', 'traceId': '00000000000000000000000000000000', 'project': 'some-project', 'service': 'some-service'}]"
+    with open("temp.txt", 'r') as f:
+        t = f.read()
     a = Analyzer()
     # a.plg_manager.add_plugin(lambda_func)
     # a.plg_manager.add_plugin(lambda_func_2)
 
     traceId = "1" * 32
-    a.analyze(t, 'some-name', traceId)
-    r = a.get_counters('some-name')
+    a.analyze(t, 'market-front-apphost', traceId)
+    r = a.get_counters('market-front-apphost')
     
     print(json.dumps(r, indent=4))
-    print(a.get_service('some-name').is_ok())
+    print(a.get_service('market-front-apphost').is_ok())

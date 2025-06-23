@@ -27,8 +27,10 @@ void InitSpan(
 }
 
 void FreeSpan(Span* span) {
-    free(span->spanId);
-    free(span->serviceName);
+    if(span->spanId != NULL)
+        free(span->spanId);
+    if(span->serviceName != NULL)
+        free(span->serviceName);
     if(span->parentSpanId != NULL)
         free(span->parentSpanId);
     free(span);

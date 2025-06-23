@@ -17,10 +17,12 @@ void InitServiceErrorCounters(ServiceErrorCounters* counters) {
 
 void FreeServiceErrorCounters(ServiceErrorCounters* counters) {
     for(int i = 0; i < counters->myExamplesCount; i++) {
-        free(counters->myBadTraceExamples[i]);
+        if(counters->myBadTraceExamples[i] != NULL)
+            free(counters->myBadTraceExamples[i]);
     }
     for(int i = 0; i < counters->notmyExamplesCount; i++) {
-        free(counters->notmyBadTraceExamples[i]);
+        if(counters->notmyBadTraceExamples[i] != NULL)
+            free(counters->notmyBadTraceExamples[i]);
     }
     free(counters);
 }
@@ -46,6 +48,9 @@ void IncCounters(ServiceErrorCounters* errorCounters, SpanStatusTypes status, bo
     case BadSpanIdSize:
         errorCounters->statusCounter[myBadSpanIdSize + !isMy]++;
         break;
+    case NoServivceName:
+        errorCounters->statusCounter[noServiceNameSpan]++;
+        break;
     case SpanOk:
         errorCounters->statusCounter[TraceOk]++;
     default:
@@ -69,6 +74,9 @@ void DecCounters(ServiceErrorCounters* errorCounters, SpanStatusTypes status, bo
         break;
     case BadSpanIdSize:
         errorCounters->statusCounter[myBadSpanIdSize + !isMy]--;
+        break;
+    case NoServivceName:
+        errorCounters->statusCounter[noServiceNameSpan]--;
         break;
     case SpanOk:
         errorCounters->statusCounter[TraceOk]--;

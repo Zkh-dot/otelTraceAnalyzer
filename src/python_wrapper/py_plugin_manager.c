@@ -64,7 +64,7 @@ void RunPyPlugins(pyPluginManager* self, Analyzer* a, Trace* t) {
         tmp = tmp->next;
         Py_DECREF(result);
     }
-    Py_DECREF(relevantCounters);
+    // Py_DECREF(relevantCounters);
 }
 
 void PyPluginManager_dealloc(pyPluginManager* self) {

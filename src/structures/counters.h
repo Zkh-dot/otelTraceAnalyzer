@@ -10,11 +10,14 @@ typedef enum {
     NoParentInTrace,
     DublicateSpan,
     BadSpanIdSize,
+    NoServivceName,
     SpanOk,
 } SpanStatusTypes;
 
 typedef enum {
     UndefTraceStatus,
+
+    noServiceNameSpan,
 
     myMissingParent,
     notmyMissingParent,

@@ -3,6 +3,6 @@
 #define EXAMPLES_LENGTH 10
 
 #define SPAN_ID_KEY "spanId"
-#define SERVICE_NAME_KEY "serviceName"
+#define SERVICE_NAME_KEY "service"
 #define PARENT_SPAN_ID_KEY "parentSpanId"
 #define TRACE_ID_KEY "traceId"
