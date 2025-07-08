@@ -57,12 +57,11 @@ void RunPyPlugins(pyPluginManager* self, Analyzer* a, Trace* t) {
             tmpTrace
         );
 
-        if (PyDict_Check(result)) {
+        if (result != NULL && PyDict_Check(result)) {
             UpdateRelevantCounters(a, result);
+            Py_DECREF(result);
         }
-        
         tmp = tmp->next;
-        Py_DECREF(result);
     }
     // Py_DECREF(relevantCounters);
 }

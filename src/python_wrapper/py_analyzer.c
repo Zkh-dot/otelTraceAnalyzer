@@ -4,6 +4,7 @@ void PyAnalyzer_dealloc(PyAnalyzer* self) {
     FreeAnalyzer(self->analyzer);
     FreePyPluginManager((pyPluginManager*)self->pluginManager);
     // Py_DECREF(self->pluginManager);
+    // free(self->analyzer);
     Py_TYPE(self)->tp_free((PyObject*)self);
 }
 
@@ -69,7 +70,8 @@ PyObject* PyGetServiceErrorCounters(PyAnalyzer* self, ServiceErrorCounters* coun
     if(counters == NULL) {
         return dict;
     }
-    for(int i = 0; i < TraceOk; i++) {
+    for(int i = 0; i < TraceOk+1; i++) {
+        printf("statusCounter[%d] = %d -> %s\n", i, counters->statusCounter[i], traceStatusMessage[i]);
         PyDict_SetItemString(dict, traceStatusMessage[i], PyLong_FromLong(counters->statusCounter[i]));
     }
     PyObject* myExamples = PyList_New(counters->myExamplesCount);
@@ -84,6 +86,8 @@ PyObject* PyGetServiceErrorCounters(PyAnalyzer* self, ServiceErrorCounters* coun
     PyDict_SetItemString(dict, "notmyExamples", notmyExamples);
     PyDict_SetItemString(dict, "badTraceCount", PyLong_FromLong(counters->badTraceCount));
     PyDict_SetItemString(dict, "mySpanCount", PyLong_FromLong(counters->mySpanCount));
+    PyDict_SetItemString(dict, "notmySpanCount", PyLong_FromLong(counters->notmySpanCount));
+    PyDict_SetItemString(dict, "inTraceSpanCount", PyLong_FromLong(counters->inTraceSpanCount));
     PyDict_SetItemString(dict, "traceCount", PyLong_FromLong(counters->traceCount));
     return dict;
 }
@@ -118,7 +122,9 @@ PyObject* PyAPIGetAllServiceErrorCounters(PyAnalyzer* self) {
         if(i == countersArr->errorCountersCount - 1) {
             return dict;
         }
+        // Py_DECREF(counters);
     }
+    FreeCountersArr(countersArr);
     return dict;
 }
 

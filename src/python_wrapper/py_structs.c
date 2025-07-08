@@ -68,10 +68,16 @@ void _rupdateCounter(PyCounters* self) {
     self->_statusCounter->notmyExamplesCount =  (int)PyLong_AsLong(self->notmyExamplesCount);
 
     for (int i = 0; i < self->_statusCounter->myExamplesCount; i++) {
-        self->_statusCounter->myBadTraceExamples[i] = (char*)PyUnicode_AsUTF8(PyList_GetItem(self->myBadTraceExamples, i));
+        if(self->_statusCounter->myBadTraceExamples[i] != NULL) {
+            free(self->_statusCounter->myBadTraceExamples[i]);
+        }
+        self->_statusCounter->myBadTraceExamples[i] = strdup((char*)PyUnicode_AsUTF8(PyList_GetItem(self->myBadTraceExamples, i)));
     }
     for (int i = 0; i < self->_statusCounter->notmyExamplesCount; i++) {
-        self->_statusCounter->notmyBadTraceExamples[i] = (char*)PyUnicode_AsUTF8(PyList_GetItem(self->notmyBadTraceExamples, i));
+        if(self->_statusCounter->notmyBadTraceExamples[i] != NULL) {
+            free(self->_statusCounter->notmyBadTraceExamples[i]);
+        }
+        self->_statusCounter->notmyBadTraceExamples[i] = strdup((char*)PyUnicode_AsUTF8(PyList_GetItem(self->notmyBadTraceExamples, i)));
     }
 }
 
@@ -115,6 +121,64 @@ PyMethodDef PyTrace_methods[] = {
 };
 
 
+// span
+void PySpan_dealloc(PySpan* self) {
+    Py_DECREF(self->spanId);
+    Py_DECREF(self->serviceName);
+    Py_DECREF(self->parentSpanId);
+    Py_DECREF(self->traceId);
+    Py_TYPE(self)->tp_free((PyObject*)self);
+}
+
+PyObject* PySpan_new(PyTypeObject* type, PyObject* args, PyObject* kwds) {
+    PySpan* self;
+    self = (PySpan*)type->tp_alloc(type, 0);
+    if (self != NULL) {
+        self->spanId = PyUnicode_FromString("");
+        self->serviceName = PyUnicode_FromString("");
+        self->parentSpanId = PyUnicode_FromString("");
+        self->traceId = PyUnicode_FromString("");
+    }
+    return (PyObject*)self;
+}
+
+int PySpan_init(PySpan* self, PyObject* args, PyObject* kwds) {
+    return 0;
+}
+
+void _rupdateSpan(PySpan* self) {
+    self->serviceName = PyUnicode_FromString(self->_span->serviceName);
+    self->spanId = PyUnicode_FromString(self->_span->spanId);
+    self->parentSpanId = PyUnicode_FromString(self->_span->parentSpanId);
+    self->traceId = PyUnicode_FromString(self->_span->traceId);
+}
+
+PyMethodDef PySpan_methods[] = {
+    {NULL}
+};
+
+PyMemberDef PySpan_members[] = {
+    {"spanId", T_OBJECT_EX, offsetof(PySpan, spanId), 0, "Span ID"},
+    {"serviceName", T_OBJECT_EX, offsetof(PySpan, serviceName), 0, "Service name"},
+    {"parentSpanId", T_OBJECT_EX, offsetof(PySpan, parentSpanId), 0, "Parent span ID"},
+    {"traceId", T_OBJECT_EX, offsetof(PySpan, traceId), 0, "Trace ID"},
+    {NULL}
+};
+
+PyTypeObject PySpanType = {
+    PyVarObject_HEAD_INIT(NULL, 0)
+    .tp_name = "pywrapper.Span",
+    .tp_doc = "Span objects",
+    .tp_basicsize = sizeof(PySpan),
+    .tp_itemsize = 0,
+    .tp_flags = Py_TPFLAGS_DEFAULT,
+    .tp_new = PySpan_new,
+    .tp_init = (initproc)PySpan_init,
+    .tp_dealloc = (destructor)PySpan_dealloc,
+    .tp_methods = PySpan_methods,
+    .tp_members = PySpan_members,
+};
+
 // trace
 void PyTrace_dealloc(PyTrace* self) {
     Py_DECREF(self->traceString);
@@ -132,6 +196,7 @@ PyObject* PyTrace_new(PyTypeObject* type, PyObject* args, PyObject* kwds) {
         self->serviceName = PyUnicode_FromString("");
         self->traceId = PyUnicode_FromString("");
         self->spansCount = PyLong_FromLong(0);
+        self->spansList = PyList_New(0);
     }
     return (PyObject*)self;
 }
@@ -152,6 +217,13 @@ void _rupdateTrace(PyTrace* self) {
     self->serviceName = PyUnicode_FromString(self->_trace->serviceName);
     self->traceId = PyUnicode_FromString(self->_trace->traceId);
     self->spansCount = PyLong_FromLong(self->_trace->spansCount);
+    for(int i = 0; i < self->_trace->spansCount; i++) {
+        PySpan* span = (PySpan*)PyType_GenericAlloc(&PySpanType, 0);
+        span->_span = self->_trace->spans[i];
+        _rupdateSpan(span);
+        PyList_Append(self->spansList, (PyObject*)span);
+        Py_DECREF(span);
+    }
 }
 
 PyMemberDef PyTrace_members[] = {

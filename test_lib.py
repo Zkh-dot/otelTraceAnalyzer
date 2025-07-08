@@ -70,10 +70,10 @@ def test_all_services(a: Analyzer, t: str):
 
 
 def lambda_func(d: dict[str, Counters], t: Trace):
-    print("wow!")
-    d["some-name"].mySpanCount = 9999999
-    d["some-name"].myBadTraceExamples.append("pipa")
-    d["some-name"].myExamplesCount += 1
+    # print("wow!", d)
+    d["nginx"].mySpanCount = 9999999
+    # d["some-name"].myBadTraceExamples.append("pipa")
+    # d["some-name"].myExamplesCount += 1
     return d
 
 
@@ -83,17 +83,28 @@ def lambda_func_2(d: dict[str, Counters], t: Trace):
     d["some-name"].myExamplesCount += 1
     return d
 
-if __name__ == '__main__':
-    t = "[{'spanId': '0000000000000000', 'serviceName': 'some-name', 'traceId': '00000000000000000000000000000000', 'project': 'some-project', 'service': 'some-service'}]"
+def main_test():
+    t = "[{'spanId': '0000000000000000', 'service': 'some-name', 'traceId': '00000000000000000000000000000000', 'project': 'some-project', 'service': 'some-service'}]"
     with open("temp.txt", 'r') as f:
         t = f.read()
     a = Analyzer()
-    # a.plg_manager.add_plugin(lambda_func)
-    # a.plg_manager.add_plugin(lambda_func_2)
-
+    a.plg_manager.add_plugin(lambda_func)
     traceId = "1" * 32
     a.analyze(t, 'market-front-apphost', traceId)
-    r = a.get_counters('market-front-apphost')
-    
-    print(json.dumps(r, indent=4))
-    print(a.get_service('market-front-apphost').is_ok())
+    print(json.dumps(a.get_counters('nginx'), indent=4))
+    # print(type(a.get_all_counters()))
+    print("del")
+    # all_counters = a.get_all_counters()
+
+    # del all_counters
+    # all_counters = a.get_all_counters()
+    # del all_counters
+    # print(json.dumps(all_counters, indent=2))
+    print("....")
+
+    del a
+
+    print("done")
+
+main_test()
+print("end")

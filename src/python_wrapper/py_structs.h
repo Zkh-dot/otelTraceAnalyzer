@@ -57,7 +57,7 @@ PyObject* PySpan_new(PyTypeObject* type, PyObject* args, PyObject* kwds);
 
 int PySpan_init(PySpan* self, PyObject* args, PyObject* kwds);
 
-void _updateSpan(PySpan* self);
+void _rupdateSpan(PySpan* self);
 
 extern PyMethodDef PySpan_methods[1];
 

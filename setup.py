@@ -33,7 +33,7 @@ ext_modules = [
         sources=SOURCE_FILES,
         include_dirs=["."],
         language="c",
-        # extra_compile_args=["-std=c2x"], # -std=c2x
+        extra_compile_args=["-O0"], # -std=c2x
     )
 ]
 
@@ -56,7 +56,7 @@ setup(
     version="1.0.5",
     author="zkh-dot",
     author_email="kernzahar@gmail.com",
-    python_requires=">=3.10",
+    python_requires=">=3.10, <=3.12",
     description="Pure C lib for python3 (or C if u wanna) to analyze traces check for compliance with the OpenTelemetry standard",
     classifiers=[
         'Programming Language :: Python :: 3',

@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include <stdio.h>
 typedef enum {
     UndefSpanStatus,
     MissingParent,
@@ -46,6 +47,8 @@ typedef struct {
     int notmyExamplesCount;
     int badTraceCount;
     int mySpanCount;
+    int notmySpanCount;
+    int inTraceSpanCount;
     int traceCount;
 } ServiceErrorCounters;
 
@@ -70,3 +73,5 @@ void AppendExample(ServiceErrorCounters* errorCounters, const char* traceId, boo
 bool IsRootSpanError(ServiceErrorCounters* errorCounters);
 
 void FreeCountersArr(CountersArr* countersArr);
+
+void countercpy(ServiceErrorCounters* dst, ServiceErrorCounters* src);

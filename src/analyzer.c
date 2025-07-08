@@ -38,6 +38,7 @@ void ParceTrace(Analyzer* analyzer, Trace* trace) {
     Service* myService = GetAddService(analyzer, trace->serviceName);
     ServiceErrorCounters* tmpCounters = (ServiceErrorCounters*)malloc(sizeof(ServiceErrorCounters));
     myService->errorCounters->traceCount++;
+    myService->errorCounters->inTraceSpanCount += trace->spansCount;
     InitServiceErrorCounters(tmpCounters);
     for(int i = 0; i < trace->spansCount; i++) {
         if(trace->spans[i]->spanStatus == NoServivceName) {
@@ -71,6 +72,7 @@ void ParceTrace(Analyzer* analyzer, Trace* trace) {
             Service* notmyService = GetAddService(analyzer, trace->spans[i]->serviceName);
             IncCounters(notmyService->errorCounters, trace->spans[i]->spanStatus, isMy);
             AppendExample(notmyService->errorCounters, trace->traceId, isMy);
+            notmyService->errorCounters->notmySpanCount++;
         }
     }
     if(!IsRootSpanError(tmpCounters)) {
@@ -123,10 +125,15 @@ CountersArr* APIGetAllServiceErrorCounters(Analyzer* analyzer) {
     int counter = 0;
     void *item;
     struct StringToService* e;
+    
     while((hashmap_iter(analyzer->serviceMap, &iter, &item))) {
         e = (struct StringToService*)item;
-        counters[counter] = e->service->errorCounters;
-        counters[counter]->serviceName = strdup(e->string);
+        ServiceErrorCounters* counterObj = malloc(sizeof(ServiceErrorCounters));
+        InitServiceErrorCounters(counterObj);
+        countercpy(counterObj, e->service->errorCounters);
+        // counters[counter] = e->service->errorCounters;
+        counterObj->serviceName = strdup(e->string);
+        counters[counter] = counterObj;
         counter++;
     }
     arr->errorCounters = counters;

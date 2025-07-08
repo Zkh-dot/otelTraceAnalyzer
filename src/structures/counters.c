@@ -5,14 +5,17 @@ void InitServiceErrorCounters(ServiceErrorCounters* counters) {
         counters->statusCounter[i] = 0;
     }
     for(int i = 0; i < EXAMPLES_LENGTH; i++) {
-        counters->myBadTraceExamples[i] = "";
-        counters->notmyBadTraceExamples[i] = "";
+        counters->myBadTraceExamples[i] = NULL;
+        counters->notmyBadTraceExamples[i] = NULL;
     }
     counters->myExamplesCount = 0;
     counters->notmyExamplesCount = 0;
     counters->badTraceCount = 0;
     counters->mySpanCount = 0;
+    counters->notmySpanCount = 0;
     counters->traceCount = 0;
+    counters->inTraceSpanCount = 0;
+    counters->serviceName = NULL;
 }
 
 void FreeServiceErrorCounters(ServiceErrorCounters* counters) {
@@ -24,6 +27,9 @@ void FreeServiceErrorCounters(ServiceErrorCounters* counters) {
         if(counters->notmyBadTraceExamples[i] != NULL)
             free(counters->notmyBadTraceExamples[i]);
     }
+    // if(counters->serviceName != NULL) {
+    //     free(counters->serviceName);
+    // }
     free(counters);
 }
 
@@ -112,4 +118,23 @@ void FreeCountersArr(CountersArr* countersArr) {
         FreeServiceErrorCounters(countersArr->errorCounters[i]);
     }
     free(countersArr);
+}
+
+void countercpy(ServiceErrorCounters* dst, ServiceErrorCounters* src) {
+    for(int i = 0; i < TraceOk; i++) {
+        dst->statusCounter[i] = src->statusCounter[i];
+    }
+    for(int i = 0; i < EXAMPLES_LENGTH; i++) {
+        if(src->myBadTraceExamples[i] != NULL)
+            dst->myBadTraceExamples[i] = strdup(src->myBadTraceExamples[i]);
+        if(src->notmyBadTraceExamples[i] != NULL)
+            dst->notmyBadTraceExamples[i] = strdup(src->notmyBadTraceExamples[i]);
+    }
+    dst->myExamplesCount = src->myExamplesCount;
+    dst->notmyExamplesCount = src->notmyExamplesCount;
+    dst->badTraceCount = src->badTraceCount;
+    dst->mySpanCount = src->mySpanCount;
+    dst->notmySpanCount = src->notmySpanCount;
+    dst->inTraceSpanCount = src->inTraceSpanCount;
+    dst->traceCount = src->traceCount;
 }
