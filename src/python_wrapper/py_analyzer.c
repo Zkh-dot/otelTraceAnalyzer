@@ -71,7 +71,6 @@ PyObject* PyGetServiceErrorCounters(PyAnalyzer* self, ServiceErrorCounters* coun
         return dict;
     }
     for(int i = 0; i < TraceOk+1; i++) {
-        printf("statusCounter[%d] = %d -> %s\n", i, counters->statusCounter[i], traceStatusMessage[i]);
         PyDict_SetItemString(dict, traceStatusMessage[i], PyLong_FromLong(counters->statusCounter[i]));
     }
     PyObject* myExamples = PyList_New(counters->myExamplesCount);

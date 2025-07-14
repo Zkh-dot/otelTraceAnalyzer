@@ -61,17 +61,15 @@ void ParceTrace(Analyzer* analyzer, Trace* trace) {
                 badSpanCount++;
             }
         }
-        if(trace->spans[i]->spanStatus == SpanOk) {
-            continue;
-        }
         tmpCounters->badTraceCount++;
+        
         if(isMy) {
             IncCounters(tmpCounters, trace->spans[i]->spanStatus, isMy);
-            AppendExample(tmpCounters, trace->traceId, isMy);
+            if(trace->spans[i]->spanStatus != SpanOk) AppendExample(tmpCounters, trace->traceId, isMy);
         } else {
             Service* notmyService = GetAddService(analyzer, trace->spans[i]->serviceName);
             IncCounters(notmyService->errorCounters, trace->spans[i]->spanStatus, isMy);
-            AppendExample(notmyService->errorCounters, trace->traceId, isMy);
+            if(trace->spans[i]->spanStatus != SpanOk) AppendExample(notmyService->errorCounters, trace->traceId, isMy);
             notmyService->errorCounters->notmySpanCount++;
         }
     }

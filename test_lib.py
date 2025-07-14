@@ -88,18 +88,22 @@ def main_test():
     with open("temp.txt", 'r') as f:
         t = f.read()
     a = Analyzer()
-    a.plg_manager.add_plugin(lambda_func)
+    # a.plg_manager.add_plugin(lambda_func)
     traceId = "1" * 32
     a.analyze(t, 'market-front-apphost', traceId)
-    print(json.dumps(a.get_counters('nginx'), indent=4))
+    traceId = "2" * 32
+    a.analyze(t, 'blender', traceId)
+    # print(json.dumps(a.get_counters('blender'), indent=4))
     # print(type(a.get_all_counters()))
     print("del")
-    # all_counters = a.get_all_counters()
+    all_counters = a.get_all_counters()
 
     # del all_counters
     # all_counters = a.get_all_counters()
     # del all_counters
-    # print(json.dumps(all_counters, indent=2))
+    for service_name, counters in all_counters.items():
+        if counters['TraceOk'] != counters['notmySpanCount']:
+            print(service_name, json.dumps(counters, indent=2))
     print("....")
 
     del a
