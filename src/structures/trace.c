@@ -114,7 +114,7 @@ char* ScanTrace(const char *field, const char *trace) {
 void FindAllSpans(Trace* trace) {
     trace->spansCount = CountSpans(trace->traceString);
     trace->spans = (Span**)malloc(trace->spansCount * sizeof(Span*));
-    
+
     const char* Delimiter = "}, {";
     char* tempCopy = trace->traceString;
     char* token = LongStrTok(tempCopy, Delimiter);
@@ -125,7 +125,13 @@ void FindAllSpans(Trace* trace) {
         char* spanParentId = ScanTrace(PARENT_SPAN_ID_KEY, tempCopy);
 
         Span* span = (Span*)malloc(sizeof(Span));
-        InitSpan(span, spanId != NULL ? spanId : "0000000000000000", serviceName != NULL ? serviceName : "", spanParentId, NULL);
+        InitSpan(
+            span,
+            spanId != NULL ? spanId : "0000000000000000",
+            serviceName != NULL ? serviceName : "",
+            spanParentId,
+            NULL
+        );
         trace->spans[i] = span;
         // if(hashset_is_member(trace->spanIds, trace->spans[i]->spanId) == 0)
         hashset_add(trace->spanIds, hash16digits(trace->spans[i]->spanId));
@@ -141,7 +147,8 @@ void FindAllSpans(Trace* trace) {
         tempCopy = token;
         token = LongStrTok(token, Delimiter);
     }
-    trace->spansCount = i + 1;
+    // TODO: check this one ?????
+    // trace->spansCount = i + 1;
 
     free(trace->traceString);
     trace->traceString = NULL;

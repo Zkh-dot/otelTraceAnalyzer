@@ -107,7 +107,7 @@ void AppendExample(ServiceErrorCounters* errorCounters, const char* traceId, boo
 
 bool IsRootSpanError(ServiceErrorCounters* errorCounters) {
     int changed = 0;
-    for(int i = 0; i < TraceOk + 1; i++) {
+    for(int i = 0; i < TraceOk; i++) {
         changed += errorCounters->statusCounter[i];
     }
     return (changed == 1) && errorCounters->statusCounter[myMissingParent] == 1;
