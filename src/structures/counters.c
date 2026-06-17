@@ -5,9 +5,10 @@ void InitServiceErrorCounters(ServiceErrorCounters* counters) {
         counters->statusCounter[i] = 0;
     }
     for(int i = 0; i < EXAMPLES_LENGTH; i++) {
-        counters->myBadTraceExamples[i] = "";
-        counters->notmyBadTraceExamples[i] = "";
+        counters->myBadTraceExamples[i] = NULL;
+        counters->notmyBadTraceExamples[i] = NULL;
     }
+    counters->serviceName = NULL;
     counters->myExamplesCount = 0;
     counters->notmyExamplesCount = 0;
     counters->badTraceCount = 0;
@@ -16,11 +17,42 @@ void InitServiceErrorCounters(ServiceErrorCounters* counters) {
 }
 
 void FreeServiceErrorCounters(ServiceErrorCounters* counters) {
+    for(int i = 0; i < counters->myExamplesCount; i++) {
+        if(counters->myBadTraceExamples[i] != NULL)
+            free(counters->myBadTraceExamples[i]);
+    }
+    for(int i = 0; i < counters->notmyExamplesCount; i++) {
+        if(counters->notmyBadTraceExamples[i] != NULL)
+            free(counters->notmyBadTraceExamples[i]);
+    }
+    if(counters->serviceName != NULL)
+        free(counters->serviceName);
     free(counters);
 }
 
+void CopyServiceErrorCounters(ServiceErrorCounters* dst, ServiceErrorCounters* src) {
+    for(int i = 0; i < TraceOk + 1; i++) {
+        dst->statusCounter[i] = src->statusCounter[i];
+    }
+    for(int i = 0; i < src->myExamplesCount; i++) {
+        if(src->myBadTraceExamples[i] != NULL)
+            dst->myBadTraceExamples[i] = strdup(src->myBadTraceExamples[i]);
+    }
+    for(int i = 0; i < src->notmyExamplesCount; i++) {
+        if(src->notmyBadTraceExamples[i] != NULL)
+            dst->notmyBadTraceExamples[i] = strdup(src->notmyBadTraceExamples[i]);
+    }
+    if(src->serviceName != NULL)
+        dst->serviceName = strdup(src->serviceName);
+    dst->myExamplesCount = src->myExamplesCount;
+    dst->notmyExamplesCount = src->notmyExamplesCount;
+    dst->badTraceCount = src->badTraceCount;
+    dst->mySpanCount = src->mySpanCount;
+    dst->traceCount = src->traceCount;
+}
+
 void sumCounters(ServiceErrorCounters* dst, ServiceErrorCounters* src) {
-    for(int i = 0; i < TraceOk; i++) {
+    for(int i = 0; i < TraceOk + 1; i++) {
         dst->statusCounter[i] += src->statusCounter[i];
     }
 }
@@ -40,8 +72,12 @@ void IncCounters(ServiceErrorCounters* errorCounters, SpanStatusTypes status, bo
     case BadSpanIdSize:
         errorCounters->statusCounter[myBadSpanIdSize + !isMy]++;
         break;
+    case NoServiceName:
+        errorCounters->statusCounter[noServiceNameSpan]++;
+        break;
     case SpanOk:
         errorCounters->statusCounter[TraceOk]++;
+        break;
     default:
         break;
     }
@@ -62,22 +98,26 @@ void DecCounters(ServiceErrorCounters* errorCounters, SpanStatusTypes status, bo
     case BadSpanIdSize:
         errorCounters->statusCounter[myBadSpanIdSize + !isMy]--;
         break;
+    case NoServiceName:
+        errorCounters->statusCounter[noServiceNameSpan]--;
+        break;
     case SpanOk:
         errorCounters->statusCounter[TraceOk]--;
+        break;
     default:
         break;
     }
 }
 
-void AppendExample(ServiceErrorCounters* errorCounters, char* traceId, bool isMy) {
+void AppendExample(ServiceErrorCounters* errorCounters, const char* traceId, bool isMy) {
     if(isMy) {
         if(errorCounters->myExamplesCount < EXAMPLES_LENGTH) {
-            errorCounters->myBadTraceExamples[errorCounters->myExamplesCount] = traceId;
+            errorCounters->myBadTraceExamples[errorCounters->myExamplesCount] = strdup(traceId);
             errorCounters->myExamplesCount++;
         }
     } else {
         if(errorCounters->notmyExamplesCount < EXAMPLES_LENGTH) {
-            errorCounters->notmyBadTraceExamples[errorCounters->notmyExamplesCount] = traceId;
+            errorCounters->notmyBadTraceExamples[errorCounters->notmyExamplesCount] = strdup(traceId);
             errorCounters->notmyExamplesCount++;
         }
     }
@@ -95,5 +135,6 @@ void FreeCountersArr(CountersArr* countersArr) {
     for(int i = 0; i < countersArr->errorCountersCount; i++) {
         FreeServiceErrorCounters(countersArr->errorCounters[i]);
     }
+    free(countersArr->errorCounters);
     free(countersArr);
 }

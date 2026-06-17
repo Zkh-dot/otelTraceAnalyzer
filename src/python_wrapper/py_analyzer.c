@@ -73,7 +73,6 @@ PyObject* PyAPIGetServiceErrorCounters(PyAnalyzer* self, PyObject* args) {
     }
     ServiceErrorCounters* counters = APIGetServiceErrorCounters(self->analyzer, serviceName);
     PyObject* dict = Counters2Dict(counters);
-    printf("%d\n", PyDict_Check(dict)); // to delete
     if(!PyDict_Check(dict))
         return NULL;
     return dict;
@@ -85,8 +84,7 @@ PyObject* PyAPIGetServiceErrorCountersObj(PyAnalyzer* self, PyObject* args) {
         return NULL;
     }
     ServiceErrorCounters* counters = APIGetServiceErrorCounters(self->analyzer, serviceName);
-    PyCounters* pyCounters = (PyCounters*)PyType_GenericAlloc(&PyCountersType, 0);
-    Py_INCREF(pyCounters);
+    PyCounters* pyCounters = (PyCounters*)PyObject_CallObject((PyObject*)&PyCountersType, NULL);
     setCounters4PyCounters(pyCounters, counters);
     return (PyObject*)pyCounters;
 }
@@ -97,7 +95,9 @@ PyObject* PyAPIGetAllServiceErrorCounters(PyAnalyzer* self) {
     for(int i = 0; i < countersArr->errorCountersCount; i++) {
         PyObject* counters = Counters2Dict(countersArr->errorCounters[i]);
         PyDict_SetItemString(dict, countersArr->errorCounters[i]->serviceName, counters);
+        Py_DECREF(counters);
     }
+    FreeCountersArr(countersArr);
     return dict;
 }
 
@@ -105,14 +105,17 @@ PyObject* PyAPIGetAllServiceErrorCountersObj(PyAnalyzer* self) {
     CountersArr* countersArr = APIGetAllServiceErrorCounters(self->analyzer);
     PyObject* dict = PyDict_New();
     for(int i = 0; i < countersArr->errorCountersCount; i++) {
-        PyObject* tmpCounters = PyType_GenericAlloc(&PyCountersType, 0);
+        PyObject* tmpCounters = PyObject_CallObject((PyObject*)&PyCountersType, NULL);
         Counters2PyCounters((PyCounters*)tmpCounters, countersArr->errorCounters[i]);
+        ((PyCounters*)tmpCounters)->ownsStatusCounter = true;
         PyDict_SetItemString(
             dict,
             countersArr->errorCounters[i]->serviceName,
             tmpCounters
         );
+        Py_DECREF(tmpCounters);
     }
+    FreeCountersArr(countersArr);
     return dict;
 }
 
@@ -122,8 +125,7 @@ PyObject* PyAPIGetServiceObj(PyAnalyzer* self, PyObject* args) {
         return NULL;
     }
     Service* service = GetAddService(self->analyzer, serviceName);
-    PyService* pyService = (PyService*)PyType_GenericAlloc(&PyServiceType, 0);
-    Py_INCREF(pyService);
+    PyService* pyService = (PyService*)PyObject_CallObject((PyObject*)&PyServiceType, NULL);
     setService4PyService(pyService, service);
     return (PyObject*)pyService;
 }
@@ -136,8 +138,7 @@ PyObject* PyAPIGetAllServiceObj(PyAnalyzer* self) {
     struct StringToService* e;
     while((hashmap_iter(self->analyzer->serviceMap, &iter, &item))) {
         e = (struct StringToService*)item;
-        PyService* pyService = (PyService*)PyType_GenericAlloc(&PyServiceType, 0);
-        Py_INCREF(pyService);
+        PyService* pyService = (PyService*)PyObject_CallObject((PyObject*)&PyServiceType, NULL);
         setService4PyService(pyService, e->service);
         PyList_SetItem(list, counter, (PyObject*)pyService);
         counter++;

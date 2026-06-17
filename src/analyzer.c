@@ -40,6 +40,12 @@ void ParceTrace(Analyzer* analyzer, Trace* trace) {
     myService->errorCounters->traceCount++;
     InitServiceErrorCounters(tmpCounters);
     for(int i = 0; i < trace->spansCount; i++) {
+        if(trace->spans[i]->spanStatus == NoServiceName) {
+            IncCounters(tmpCounters, NoServiceName, true);
+            AppendExample(tmpCounters, trace->traceId, true);
+            tmpCounters->badTraceCount++;
+            continue;
+        }
         bool isMy = strcmp(trace->serviceName, trace->spans[i]->serviceName) == 0;
         myService->errorCounters->mySpanCount += isMy;
         if(trace->spans[i]->parentSpanId == NULL) {
@@ -74,7 +80,7 @@ void ParceTrace(Analyzer* analyzer, Trace* trace) {
     } else {
             IncCounters(myService->errorCounters, SpanOk, true);
     }
-    free(tmpCounters);
+    FreeServiceErrorCounters(tmpCounters);
 }
 
 void RunPlugins(Analyzer* analyzer, Trace* trace) {
@@ -104,7 +110,7 @@ void APIAnalyzeTrace(
 }
 
 ServiceErrorCounters* APIGetServiceErrorCounters(Analyzer* analyzer, const char* serviceName) {
-    Service* service = FindService(analyzer->serviceMap, serviceName);
+    Service* service = GetAddService(analyzer, serviceName);
     ServiceErrorCounters* counters = service->errorCounters;
     return counters;
 }
@@ -118,8 +124,10 @@ CountersArr* APIGetAllServiceErrorCounters(Analyzer* analyzer) {
     struct StringToService* e;
     while((hashmap_iter(analyzer->serviceMap, &iter, &item))) {
         e = (struct StringToService*)item;
-        counters[counter] = e->service->errorCounters;
-        counters[counter]->serviceName = e->string;
+        counters[counter] = (ServiceErrorCounters*)malloc(sizeof(ServiceErrorCounters));
+        InitServiceErrorCounters(counters[counter]);
+        CopyServiceErrorCounters(counters[counter], e->service->errorCounters);
+        counters[counter]->serviceName = strdup(e->string);
         counter++;
     }
     arr->errorCounters = counters;

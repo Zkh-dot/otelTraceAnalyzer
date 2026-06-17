@@ -3,6 +3,8 @@
 const char* traceStatusMessage[TraceOk + 1] = {
     "UndefTraceStatus",
 
+    "noServiceNameSpan",
+
     "myMissingParent",
     "notmyMissingParent",
 
@@ -99,10 +101,8 @@ void SplitTrace(char *input, const char *delimiter, int spanCount, char** result
 void FindAllSpans(Trace* trace) {
     trace->spansCount = CountSpans(trace->traceString);
     trace->spans = (Span**)malloc(trace->spansCount * sizeof(Span*));
-    printf("trace: %s\n", trace->traceString);
     
     const char* Delimiter = "}, {";
-    // char* tempCopy = strdup(trace->traceString);
     char** chunkPtrs = malloc((trace->spansCount) * sizeof(char*));
     SplitTrace(trace->traceString, Delimiter, trace->spansCount, chunkPtrs);
     for(int i = 0; i < trace->spansCount; i++) {
@@ -110,14 +110,19 @@ void FindAllSpans(Trace* trace) {
         char* serviceName = ScanTrace(SERVICE_NAME_KEY, chunkPtrs[i]);
         char* spanParentId = ScanTrace(PARENT_SPAN_ID_KEY, chunkPtrs[i]);
         Span* span = (Span*)malloc(sizeof(Span));
-        InitSpan(span, spanId, serviceName, spanParentId, NULL);
+        InitSpan(span, spanId != NULL ? spanId : "", serviceName != NULL ? serviceName : "", spanParentId, NULL);
+        if(serviceName == NULL)
+            span->spanStatus = NoServiceName;
         trace->spans[i] = span;
-        if(hashset_is_member(trace->spanIds, trace->spans[i]->spanId) == 0)
+        if(spanId != NULL && hashset_is_member(trace->spanIds, trace->spans[i]->spanId) == 0)
             hashset_add(trace->spanIds, trace->spans[i]->spanId);
         
-        free(spanId);
-        free(serviceName);
-        free(spanParentId);
+        if(spanId != NULL)
+            free(spanId);
+        if(serviceName != NULL)
+            free(serviceName);
+        if(spanParentId != NULL)
+            free(spanParentId);
     }
     free(trace->traceString);
     free(chunkPtrs);
