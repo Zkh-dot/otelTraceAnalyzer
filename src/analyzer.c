@@ -38,6 +38,7 @@ void ParceTrace(Analyzer* analyzer, Trace* trace) {
     Service* myService = GetAddService(analyzer, trace->serviceName);
     ServiceErrorCounters* tmpCounters = (ServiceErrorCounters*)malloc(sizeof(ServiceErrorCounters));
     myService->errorCounters->traceCount++;
+    myService->errorCounters->inTraceSpanCount += trace->spansCount;
     InitServiceErrorCounters(tmpCounters);
     for(int i = 0; i < trace->spansCount; i++) {
         if(trace->spans[i]->spanStatus == NoServiceName) {
@@ -48,6 +49,11 @@ void ParceTrace(Analyzer* analyzer, Trace* trace) {
         }
         bool isMy = strcmp(trace->serviceName, trace->spans[i]->serviceName) == 0;
         myService->errorCounters->mySpanCount += isMy;
+        Service* notmyService = NULL;
+        if(!isMy) {
+            notmyService = GetAddService(analyzer, trace->spans[i]->serviceName);
+            notmyService->errorCounters->notmySpanCount++;
+        }
         if(trace->spans[i]->parentSpanId == NULL) {
             trace->spans[i]->spanStatus = MissingParent;
             badSpanCount++;
@@ -61,6 +67,9 @@ void ParceTrace(Analyzer* analyzer, Trace* trace) {
                 badSpanCount++;
             }
         }
+        if(trace->spans[i]->spanStatus == UndefSpanStatus) {
+            trace->spans[i]->spanStatus = SpanOk;
+        }
         if(trace->spans[i]->spanStatus == SpanOk) {
             continue;
         }
@@ -69,7 +78,6 @@ void ParceTrace(Analyzer* analyzer, Trace* trace) {
             AppendExample(tmpCounters, trace->traceId, isMy);
             tmpCounters->badTraceCount++;
         } else {
-            Service* notmyService = GetAddService(analyzer, trace->spans[i]->serviceName);
             IncCounters(notmyService->errorCounters, trace->spans[i]->spanStatus, isMy);
             AppendExample(notmyService->errorCounters, trace->traceId, isMy);
         }

@@ -12,7 +12,9 @@ void PyCounters_dealloc(PyCounters* self) {
     Py_DECREF(self->serviceName);
     Py_DECREF(self->badTraceCount);
     Py_DECREF(self->mySpanCount);
+    Py_DECREF(self->notmySpanCount);
     Py_DECREF(self->traceCount);
+    Py_DECREF(self->inTraceSpanCount);
     Py_DECREF(self->statusCounter);
     Py_TYPE(self)->tp_free((PyObject*)self);
 }
@@ -31,7 +33,9 @@ PyObject* PyCounters_new(PyTypeObject* type, PyObject* args, PyObject* kwds) {
         self->serviceName = PyUnicode_FromString("");
         self->badTraceCount = PyLong_FromLong(0);
         self->mySpanCount = PyLong_FromLong(0);
+        self->notmySpanCount = PyLong_FromLong(0);
         self->traceCount = PyLong_FromLong(0);
+        self->inTraceSpanCount = PyLong_FromLong(0);
     }
     return (PyObject*)self;
 }
@@ -43,7 +47,9 @@ int PyCounters_init(PyCounters* self, PyObject* args, PyObject* kwds) {
 void _updateCounter(PyCounters* self) {
     self->badTraceCount =       Py_BuildValue("i", self->_statusCounter->badTraceCount);
     self->mySpanCount =         Py_BuildValue("i", self->_statusCounter->mySpanCount);
+    self->notmySpanCount =      Py_BuildValue("i", self->_statusCounter->notmySpanCount);
     self->traceCount =          Py_BuildValue("i", self->_statusCounter->traceCount);
+    self->inTraceSpanCount =    Py_BuildValue("i", self->_statusCounter->inTraceSpanCount);
     self->myExamplesCount =     Py_BuildValue("i", self->_statusCounter->myExamplesCount);
     self->notmyExamplesCount =  Py_BuildValue("i", self->_statusCounter->notmyExamplesCount);
 
@@ -77,7 +83,9 @@ void _updateCounter(PyCounters* self) {
 void _rupdateCounter(PyCounters* self) {
     self->_statusCounter->badTraceCount =       (int)PyLong_AsLong(self->badTraceCount);
     self->_statusCounter->mySpanCount =         (int)PyLong_AsLong(self->mySpanCount);
+    self->_statusCounter->notmySpanCount =      (int)PyLong_AsLong(self->notmySpanCount);
     self->_statusCounter->traceCount =          (int)PyLong_AsLong(self->traceCount);
+    self->_statusCounter->inTraceSpanCount =    (int)PyLong_AsLong(self->inTraceSpanCount);
     self->_statusCounter->myExamplesCount =     (int)PyLong_AsLong(self->myExamplesCount);
     self->_statusCounter->notmyExamplesCount =  (int)PyLong_AsLong(self->notmyExamplesCount);
 
@@ -110,7 +118,9 @@ PyMemberDef PyCounters_members[] = {
     {"serviceName", T_OBJECT_EX, offsetof(PyCounters, serviceName), 0, "Service name"},
     {"badTraceCount", T_OBJECT_EX, offsetof(PyCounters, badTraceCount), 0, "Bad trace count"},
     {"mySpanCount", T_OBJECT_EX, offsetof(PyCounters, mySpanCount), 0, "My span count"},
+    {"notmySpanCount", T_OBJECT_EX, offsetof(PyCounters, notmySpanCount), 0, "Not my span count"},
     {"traceCount", T_OBJECT_EX, offsetof(PyCounters, traceCount), 0, "Trace count"},
+    {"inTraceSpanCount", T_OBJECT_EX, offsetof(PyCounters, inTraceSpanCount), 0, "In trace span count"},
     {"statusCounters", T_OBJECT_EX, offsetof(PyCounters, statusCounter), 0, "Trace count"},
     {NULL}
 };

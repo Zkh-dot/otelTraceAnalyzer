@@ -47,7 +47,9 @@ typedef struct {
     int notmyExamplesCount;
     int badTraceCount;
     int mySpanCount;
+    int notmySpanCount;
     int traceCount;
+    int inTraceSpanCount;
 } ServiceErrorCounters;
 
 typedef struct {
