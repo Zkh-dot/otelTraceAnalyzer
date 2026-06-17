@@ -52,7 +52,7 @@ void ParceTrace(Analyzer* analyzer, Trace* trace) {
             trace->spans[i]->spanStatus = MissingParent;
             badSpanCount++;
         } else {
-            if(!hashset_is_member(trace->spanIds, trace->spans[i]->parentSpanId)) {
+            if(FindSpan(trace->spans, trace->spansCount, trace->spans[i]->parentSpanId) == NULL) {
                 trace->spans[i]->spanStatus = NoParentInTrace;
                 badSpanCount++;
             }
