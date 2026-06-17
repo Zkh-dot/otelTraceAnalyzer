@@ -208,7 +208,7 @@ PyObject* PyService_new(PyTypeObject* type, PyObject* args, PyObject* kwds) {
     PyService* self;
     self = (PyService*)type->tp_alloc(type, 0);
     if (self != NULL) {
-        self->errorCounters = (PyCounters*)PyType_GenericAlloc(&PyCountersType, 0);
+        self->errorCounters = (PyCounters*)PyObject_CallObject((PyObject*)&PyCountersType, NULL);
         self->serviceName = PyUnicode_FromString("");
     }
     return (PyObject*)self;
@@ -225,13 +225,50 @@ void _updateService(PyService* self) {
 }
 
 void setService4PyService(PyService* self, Service* service) {
+    PyObject* serviceName = PyUnicode_FromString(service->serviceName);
+    if (serviceName == NULL) {
+        return;
+    }
+
+    PyCounters* errorCounters = (PyCounters*)PyObject_CallObject((PyObject*)&PyCountersType, NULL);
+    if (errorCounters == NULL) {
+        Py_DECREF(serviceName);
+        return;
+    }
+
+    ServiceErrorCounters* countersCopy = (ServiceErrorCounters*)malloc(sizeof(ServiceErrorCounters));
+    if (countersCopy == NULL) {
+        Py_DECREF(serviceName);
+        Py_DECREF(errorCounters);
+        PyErr_NoMemory();
+        return;
+    }
+    InitServiceErrorCounters(countersCopy);
+    CopyServiceErrorCounters(countersCopy, service->errorCounters);
+    setCounters4PyCounters(errorCounters, countersCopy);
+    errorCounters->ownsStatusCounter = true;
+
     self->_service = service;
-    self->serviceName = PyUnicode_FromString(service->serviceName);
-    self->errorCounters = (PyCounters*)PyType_GenericAlloc(&PyCountersType, 0);
-    setCounters4PyCounters(self->errorCounters, service->errorCounters);
+    Py_DECREF(self->serviceName);
+    self->serviceName = serviceName;
+    Py_DECREF(self->errorCounters);
+    self->errorCounters = errorCounters;
+}
+
+PyObject* PyService_is_ok(PyService* self, PyObject* Py_UNUSED(ignored)) {
+    if (self->errorCounters == NULL || self->errorCounters->_statusCounter == NULL) {
+        Py_RETURN_TRUE;
+    }
+    for (int i = 0; i < TraceOk; i++) {
+        if (self->errorCounters->_statusCounter->statusCounter[i] != 0) {
+            Py_RETURN_FALSE;
+        }
+    }
+    Py_RETURN_TRUE;
 }
 
 PyMethodDef PyService_methods[] = {
+    {"is_ok", (PyCFunction)PyService_is_ok, METH_NOARGS, "Return whether the service has no non-OK trace statuses"},
     {NULL}
 };
 
