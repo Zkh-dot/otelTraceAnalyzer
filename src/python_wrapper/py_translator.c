@@ -32,7 +32,9 @@ PyObject* Counters2Dict(ServiceErrorCounters* counters) {
     Py_DECREF(notmyExamples);
     PyDict_SetItemString(dict, "badTraceCount", PyLong_FromLong(counters->badTraceCount));
     PyDict_SetItemString(dict, "mySpanCount", PyLong_FromLong(counters->mySpanCount));
+    PyDict_SetItemString(dict, "notmySpanCount", PyLong_FromLong(counters->notmySpanCount));
     PyDict_SetItemString(dict, "traceCount", PyLong_FromLong(counters->traceCount));
+    PyDict_SetItemString(dict, "inTraceSpanCount", PyLong_FromLong(counters->inTraceSpanCount));
     
     return dict;
 }

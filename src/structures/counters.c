@@ -13,7 +13,9 @@ void InitServiceErrorCounters(ServiceErrorCounters* counters) {
     counters->notmyExamplesCount = 0;
     counters->badTraceCount = 0;
     counters->mySpanCount = 0;
+    counters->notmySpanCount = 0;
     counters->traceCount = 0;
+    counters->inTraceSpanCount = 0;
 }
 
 void FreeServiceErrorCounters(ServiceErrorCounters* counters) {
@@ -48,7 +50,9 @@ void CopyServiceErrorCounters(ServiceErrorCounters* dst, ServiceErrorCounters* s
     dst->notmyExamplesCount = src->notmyExamplesCount;
     dst->badTraceCount = src->badTraceCount;
     dst->mySpanCount = src->mySpanCount;
+    dst->notmySpanCount = src->notmySpanCount;
     dst->traceCount = src->traceCount;
+    dst->inTraceSpanCount = src->inTraceSpanCount;
 }
 
 void sumCounters(ServiceErrorCounters* dst, ServiceErrorCounters* src) {

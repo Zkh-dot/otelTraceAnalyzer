@@ -22,7 +22,9 @@ typedef struct {
     PyObject* serviceName;
     PyObject* badTraceCount;
     PyObject* mySpanCount;
+    PyObject* notmySpanCount;
     PyObject* traceCount;
+    PyObject* inTraceSpanCount;
 } PyCounters;
 
 void PyCounters_dealloc(PyCounters* self);
@@ -39,7 +41,7 @@ void setCounters4PyCounters(PyCounters* self, ServiceErrorCounters* counters);
 
 extern PyMethodDef PyCounters_methods[1];
 
-extern PyMemberDef PyCounters_members[10];
+extern PyMemberDef PyCounters_members[12];
 
 extern PyTypeObject PyCountersType;
 

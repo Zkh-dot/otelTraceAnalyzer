@@ -9,7 +9,9 @@ class Counters:
     serviceName: str
     badTraceCount: int
     mySpanCount: int
+    notmySpanCount: int
     traceCount: int
+    inTraceSpanCount: int
     def __init__(self) -> None:
         ...
 class Analyzer:

@@ -106,7 +106,10 @@ PyObject* PyAPIGetAllServiceErrorCountersObj(PyAnalyzer* self) {
     PyObject* dict = PyDict_New();
     for(int i = 0; i < countersArr->errorCountersCount; i++) {
         PyObject* tmpCounters = PyObject_CallObject((PyObject*)&PyCountersType, NULL);
-        Counters2PyCounters((PyCounters*)tmpCounters, countersArr->errorCounters[i]);
+        ServiceErrorCounters* countersCopy = (ServiceErrorCounters*)malloc(sizeof(ServiceErrorCounters));
+        InitServiceErrorCounters(countersCopy);
+        CopyServiceErrorCounters(countersCopy, countersArr->errorCounters[i]);
+        Counters2PyCounters((PyCounters*)tmpCounters, countersCopy);
         ((PyCounters*)tmpCounters)->ownsStatusCounter = true;
         PyDict_SetItemString(
             dict,
