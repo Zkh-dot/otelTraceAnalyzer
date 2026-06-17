@@ -3,7 +3,8 @@
 
 // counters
 void PyCounters_dealloc(PyCounters* self) {
-    free(self->_statusCounter);
+    if(self->ownsStatusCounter)
+        FreeServiceErrorCounters(self->_statusCounter);
     Py_DECREF(self->myBadTraceExamples);
     Py_DECREF(self->notmyBadTraceExamples);
     Py_DECREF(self->myExamplesCount);
@@ -21,6 +22,8 @@ PyObject* PyCounters_new(PyTypeObject* type, PyObject* args, PyObject* kwds) {
     self = (PyCounters*)type->tp_alloc(type, 0);
     if (self != NULL) {
         self->myBadTraceExamples = PyList_New(0);
+        self->_statusCounter = NULL;
+        self->ownsStatusCounter = false;
         self->statusCounter = PyDict_New();
         self->notmyBadTraceExamples = PyList_New(0);
         self->myExamplesCount = PyLong_FromLong(0);
@@ -91,6 +94,7 @@ void _rupdateCounter(PyCounters* self) {
 
 void setCounters4PyCounters(PyCounters* self, ServiceErrorCounters* counters) {
     self->_statusCounter = counters;
+    self->ownsStatusCounter = false;
     _updateCounter(self);
 }
 

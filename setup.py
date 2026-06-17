@@ -1,7 +1,6 @@
 from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
 import sys
-import shutil, os
 
 SOURCE_FILES = [
     "src/analyzer.c",
@@ -29,7 +28,7 @@ SOURCE_FILES = [
 
 ext_modules = [
     Extension(
-        "otelanalyzer",
+        "otelanalyzer.otelanalyzer",
         sources=SOURCE_FILES,
         include_dirs=["."],
         language="c",
@@ -39,17 +38,11 @@ ext_modules = [
 
 class BuildExt(build_ext):
     """Build extension with platform-specific flags"""
-    def get_ext_filename(self, ext_name):
-        return f"{ext_name}.so"
-    
     def build_extensions(self):
         if sys.platform == "linux":
             for ext in self.extensions:
                 ext.extra_link_args += ["-shared"]
         super().build_extensions()
-
-        if os.path.exists("./otelanalyzer.so"):
-            shutil.move("otelanalyzer.so", os.path.join("otelanalyzer", "otelanalyzer.so"))
 
 setup(
     name="otelanalyzer",
@@ -63,9 +56,15 @@ setup(
         'License :: OSI Approved :: MIT License',  # License type
         'Operating System :: POSIX :: Linux',
     ],
-    package_data={"otelanalyzer": ["*.c", "*.h", "*.pyi"]},
+    packages=["otelanalyzer"],
+    package_data={"otelanalyzer": ["*.c", "*.h", "*.pyi", "py.typed"]},
     cmdclass={"build_ext": BuildExt},
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
     ext_modules=ext_modules,
+    entry_points={
+        "console_scripts": [
+            "otelanalyzer-metrics=otelanalyzer.cli:main",
+        ],
+    },
 )

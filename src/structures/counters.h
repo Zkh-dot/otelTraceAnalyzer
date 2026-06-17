@@ -3,6 +3,7 @@
 #include "config.h"
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
 
 typedef enum {
     UndefSpanStatus,
@@ -10,11 +11,14 @@ typedef enum {
     NoParentInTrace,
     DublicateSpan,
     BadSpanIdSize,
+    NoServiceName,
     SpanOk,
 } SpanStatusTypes;
 
 typedef enum {
     UndefTraceStatus,
+
+    noServiceNameSpan,
 
     myMissingParent,
     notmyMissingParent,
@@ -56,13 +60,15 @@ void InitServiceErrorCounters(ServiceErrorCounters* counters);
 
 void FreeServiceErrorCounters(ServiceErrorCounters* counters);
 
+void CopyServiceErrorCounters(ServiceErrorCounters* dst, ServiceErrorCounters* src);
+
 void sumCounters(ServiceErrorCounters* dst, ServiceErrorCounters* src);
 
 void IncCounters(ServiceErrorCounters* errorCounters, SpanStatusTypes status, bool isMy);
 
 void DecCounters(ServiceErrorCounters* errorCounters, SpanStatusTypes status, bool isMy);
 
-void AppendExample(ServiceErrorCounters* errorCounters, char* traceId, bool isMy);
+void AppendExample(ServiceErrorCounters* errorCounters, const char* traceId, bool isMy);
 
 bool IsRootSpanError(ServiceErrorCounters* errorCounters);
 

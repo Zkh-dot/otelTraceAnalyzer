@@ -110,7 +110,17 @@ def test_plugin(a: Analyzer, t: str):
 
 or
 
-```$ python3 setup.py build_ext --inplace && mv ./otelanalyzer.so ./otelanalyzer```
+```$ python3 setup.py build_ext --inplace```
+
+## CLI metrics export
+
+For JSON files with a top-level `traces` array, you can write analyzer metrics to a JSON file:
+
+```$ otelanalyzer-metrics traces.json --output metrics.json```
+
+When running from a source checkout, the same CLI is available through:
+
+```$ python3 come_with_me.py traces.json --output metrics.json```
 
 # Dependencies
 
@@ -120,4 +130,3 @@ The package has no dependencies.
 
 * Python unit tests
 * Wheels for Python 3.13 (you can already build it locally, check installation)
-

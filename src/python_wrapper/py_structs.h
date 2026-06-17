@@ -2,6 +2,7 @@
 
 #include <Python.h>
 #include <structmember.h>
+#include <stdbool.h>
 #include "../structures/counters.h"
 #include "../structures/span.h"
 #include "../structures/trace.h"
@@ -12,6 +13,7 @@
 typedef struct {
     PyObject_HEAD
     ServiceErrorCounters* _statusCounter;
+    bool ownsStatusCounter;
     PyObject* statusCounter;
     PyObject* myBadTraceExamples;
     PyObject* notmyBadTraceExamples;

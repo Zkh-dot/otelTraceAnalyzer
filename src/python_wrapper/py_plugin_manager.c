@@ -20,9 +20,12 @@ void FreePyPluginManager(pyPluginManager* self) {
 PyObject* RelevantCounters(Analyzer* a, Trace* t) {
     PyObject* dict = PyDict_New();
     for(int i = 0; i < t->spansCount; i++) {
-        PyCounters* pyCounters = (PyCounters*)PyType_GenericAlloc(&PyCountersType, 0);
+        if(t->spans[i]->serviceName == NULL || t->spans[i]->serviceName[0] == '\0')
+            continue;
+        PyCounters* pyCounters = (PyCounters*)PyObject_CallObject((PyObject*)&PyCountersType, NULL);
         setCounters4PyCounters(pyCounters, APIGetServiceErrorCounters(a, t->spans[i]->serviceName));
         PyDict_SetItemString(dict, t->spans[i]->serviceName, (PyObject*)pyCounters);
+        Py_DECREF(pyCounters);
     }
     return dict;
 }
@@ -44,9 +47,11 @@ void FreeRelevantCounters(PyObject* list) {
 }
 
 void RunPyPlugins(pyPluginManager* self, Analyzer* a, Trace* t) {
+    if(self->pyPluginsHead == NULL)
+        return;
     PyPlugin* tmp = self->pyPluginsHead;
     PyObject* relevantCounters = RelevantCounters(a, t);
-    PyObject* tmpTrace = PyType_GenericAlloc(&PyTraceType, 0);
+    PyObject* tmpTrace = PyObject_CallObject((PyObject*)&PyTraceType, NULL);
     while(tmp != NULL) {
         PyObject* pyPlugin = tmp->pyPlugin;
         tmpTrace = Trace2PyTrace((PyTrace*)tmpTrace, t);
@@ -57,13 +62,14 @@ void RunPyPlugins(pyPluginManager* self, Analyzer* a, Trace* t) {
             tmpTrace
         );
 
-        if (PyDict_Check(result)) {
+        if (result != NULL && PyDict_Check(result)) {
             UpdateRelevantCounters(a, result);
         }
         
         tmp = tmp->next;
-        Py_DECREF(result);
+        Py_XDECREF(result);
     }
+    Py_DECREF(tmpTrace);
     Py_DECREF(relevantCounters);
 }
 
