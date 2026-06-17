@@ -64,9 +64,11 @@ int PySpan_init(PySpan* self, PyObject* args, PyObject* kwds);
 
 void _updateSpan(PySpan* self);
 
+void setSpan4PySpan(PySpan* self, Span* span);
+
 extern PyMethodDef PySpan_methods[1];
 
-extern PyMemberDef PySpan_members[4];
+extern PyMemberDef PySpan_members[5];
 
 extern PyTypeObject PySpanType;
 

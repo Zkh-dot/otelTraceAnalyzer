@@ -109,8 +109,9 @@ void FindAllSpans(Trace* trace) {
         char* spanId = ScanTrace(SPAN_ID_KEY, chunkPtrs[i]);
         char* serviceName = ScanTrace(SERVICE_NAME_KEY, chunkPtrs[i]);
         char* spanParentId = ScanTrace(PARENT_SPAN_ID_KEY, chunkPtrs[i]);
+        char* traceId = ScanTrace(TRACE_ID_KEY, chunkPtrs[i]);
         Span* span = (Span*)malloc(sizeof(Span));
-        InitSpan(span, spanId != NULL ? spanId : "", serviceName != NULL ? serviceName : "", spanParentId, NULL);
+        InitSpan(span, spanId, serviceName, spanParentId, traceId, NULL);
         if(serviceName == NULL)
             span->spanStatus = NoServiceName;
         trace->spans[i] = span;
@@ -123,6 +124,8 @@ void FindAllSpans(Trace* trace) {
             free(serviceName);
         if(spanParentId != NULL)
             free(spanParentId);
+        if(traceId != NULL)
+            free(traceId);
     }
     free(trace->traceString);
     free(chunkPtrs);

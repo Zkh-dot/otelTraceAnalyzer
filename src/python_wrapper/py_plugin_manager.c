@@ -55,6 +55,7 @@ void RunPyPlugins(pyPluginManager* self, Analyzer* a, Trace* t) {
     while(tmp != NULL) {
         PyObject* pyPlugin = tmp->pyPlugin;
         tmpTrace = Trace2PyTrace((PyTrace*)tmpTrace, t);
+        _rupdateTrace((PyTrace*)tmpTrace);
         PyObject* result = PyObject_CallFunction(
             pyPlugin,
             "OO",

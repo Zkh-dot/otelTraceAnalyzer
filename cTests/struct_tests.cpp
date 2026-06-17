@@ -34,13 +34,15 @@ TEST(Spans, InitSpan) {
     char* spanId = (char*)"spanId";
     char* serviceName = (char*)"serviceName";
     char* parentSpanId = (char*)"parentSpanId";
+    char* traceId = (char*)"traceId";
     Span* parentSpan = NULL;
-    InitSpan(span, spanId, serviceName, parentSpanId, parentSpan);
+    InitSpan(span, spanId, serviceName, parentSpanId, traceId, parentSpan);
 
     spanId = (char*)""; serviceName = (char*)"";
 
     EXPECT_EQ(strlen(span->spanId), strlen("spanId"));
     EXPECT_EQ(strlen(span->serviceName), strlen("serviceName"));
+    EXPECT_EQ(strlen(span->traceId), strlen("traceId"));
     EXPECT_EQ(span->spanStatus, UndefSpanStatus);
     // FreeSpan(span);
 }
@@ -50,8 +52,9 @@ TEST(Spans, FreeSpan) {
     char* spanId = (char*)"spanId";
     char* serviceName = (char*)"serviceName";
     char* parentSpanId = (char*)"parentSpanId";
+    char* traceId = (char*)"traceId";
     Span* parentSpan = NULL;
-    InitSpan(span, spanId, serviceName, parentSpanId, parentSpan);
+    InitSpan(span, spanId, serviceName, parentSpanId, traceId, parentSpan);
     FreeSpan(span);
 }
 
@@ -62,13 +65,16 @@ TEST(Spans, FreeSpanTree) {
     Span* parentSpan = (Span*)malloc(sizeof(Span));
     char* parentSpanId = (char*)"parentSpanId";
     char* parentServiceName = (char*)"parentServiceName";
-    InitSpan(span, spanId, serviceName, parentSpanId, parentSpan);
-    InitSpan(parentSpan, parentSpanId, parentServiceName, NULL, NULL);
+    char* traceId = (char*)"traceId";
+    InitSpan(span, spanId, serviceName, parentSpanId, traceId, parentSpan);
+    InitSpan(parentSpan, parentSpanId, parentServiceName, NULL, traceId, NULL);
     EXPECT_EQ(strlen(span->spanId), strlen("spanId"));
     EXPECT_EQ(strlen(span->serviceName), strlen("serviceName"));
+    EXPECT_EQ(strlen(span->traceId), strlen("traceId"));
     EXPECT_EQ(span->spanStatus, UndefSpanStatus);
     EXPECT_EQ(strlen(span->parentSpan->spanId), strlen("parentSpanId"));
     EXPECT_EQ(strlen(span->parentSpan->serviceName), strlen("parentServiceName"));
+    EXPECT_EQ(strlen(span->parentSpan->traceId), strlen("traceId"));
     EXPECT_EQ(span->parentSpan->spanStatus, UndefSpanStatus);
     FreeSpanTree(span);
 }

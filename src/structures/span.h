@@ -21,6 +21,7 @@ void InitSpan(
     const char* spanId,
     const char* serviceName,
     const char* parentSpanId,
+    const char* traceId,
     Span* parentSpan
 );
 

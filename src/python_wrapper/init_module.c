@@ -15,6 +15,10 @@ PyMODINIT_FUNC PyInit_otelanalyzer(void) {
         return NULL;
     }
 
+    if (PyType_Ready(&PySpanType) < 0) {
+        return NULL;
+    }
+
     if (PyType_Ready(&PyCountersType) < 0) {
         return NULL;
     }
@@ -46,6 +50,11 @@ PyMODINIT_FUNC PyInit_otelanalyzer(void) {
     }
     PyObject* trace_obj = (PyObject*)&PyTraceType;
     if(PyModule_AddObject(m, "Trace", trace_obj) < 0) {
+        Py_DECREF(m);
+        return NULL;
+    }
+    PyObject* span_obj = (PyObject*)&PySpanType;
+    if(PyModule_AddObject(m, "Span", span_obj) < 0) {
         Py_DECREF(m);
         return NULL;
     }

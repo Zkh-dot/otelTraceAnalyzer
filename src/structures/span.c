@@ -14,14 +14,16 @@ void InitSpan(
         const char* spanId,
         const char* serviceName,
         const char* parentSpanId,
+        const char* traceId,
         Span* parentSpan
     ) {
-    span->spanId = strdup(spanId);
-    span->serviceName = strdup(serviceName);
+    span->spanId = strdup(spanId != NULL ? spanId : "");
+    span->serviceName = strdup(serviceName != NULL ? serviceName : "");
     if(parentSpanId != NULL)
         span->parentSpanId = strdup(parentSpanId);
     else
         span->parentSpanId = NULL;
+    span->traceId = strdup(traceId != NULL ? traceId : "");
     span->parentSpan = parentSpan;
     span->spanStatus = UndefSpanStatus;
 }
@@ -31,6 +33,7 @@ void FreeSpan(Span* span) {
     free(span->serviceName);
     if(span->parentSpanId != NULL)
         free(span->parentSpanId);
+    free(span->traceId);
     free(span);
 }
 
@@ -49,7 +52,7 @@ void FreeAllSpans(Span** spans, int count) {
 }
 
 Span* spancpy(Span* target, Span* source) {
-    InitSpan(target, source->spanId, source->serviceName, source->parentSpanId, source->parentSpan);
+    InitSpan(target, source->spanId, source->serviceName, source->parentSpanId, source->traceId, source->parentSpan);
     target->spanStatus = source->spanStatus;
     return target;
 }
