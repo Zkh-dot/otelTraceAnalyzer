@@ -112,6 +112,20 @@ or
 
 ```$ python3 setup.py build_ext --inplace```
 
+## Release workflow
+
+Build the extension in place and create local wheels in `dist`:
+
+```$ ./release.sh```
+
+Preview the release commands without running them:
+
+```$ ./release.sh --dry-run```
+
+Upload the wheels only when explicitly requested:
+
+```$ ./release.sh --upload```
+
 ## CLI metrics export
 
 For JSON files with a top-level `traces` array, you can write analyzer metrics to a JSON file:
