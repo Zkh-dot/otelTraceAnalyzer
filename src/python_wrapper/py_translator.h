@@ -10,8 +10,6 @@
 
 ServiceErrorCounters* PyCounters2Counters(PyObject* src);
 
-PyObject* Counters2PyCounters(PyCounters* dst, ServiceErrorCounters* src);
-
 PyObject* Counters2Dict(ServiceErrorCounters* Counters);
 
 // Span* PySpan2Span(PyObject* span);
@@ -19,8 +17,6 @@ PyObject* Counters2Dict(ServiceErrorCounters* Counters);
 // PyObject* Span2PySpan(Span* span);
 
 Trace* PyTrace2Trace(PyObject* src);
-
-PyObject* Trace2PyTrace(PyTrace* dst, Trace* src);
 
 // Service* PyService2Service(PyObject* service);
 

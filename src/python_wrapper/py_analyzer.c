@@ -54,15 +54,15 @@ PyObject* PyAPIAnalyzeTrace(PyAnalyzer* self, PyObject* args) {
     PyAnalyzeTrace(self, trace);
     // TODO: maybe, but better not
     // if(self->analyzer->storeTraces)
-    //     _rupdateTrace(trace);
+    //     _updatePyTrace(trace, trace->_trace);
     Py_RETURN_NONE;
 }
 
 PyObject* PyAPIAnalyzeTraceBTrace(PyAnalyzer* self, PyTrace* trace) {
-    _updateTrace(trace);
+    _updateCTrace(trace);
     PyAnalyzeTrace(self, trace->_trace);
     if(self->analyzer->storeTraces)
-        _rupdateTrace(trace);
+        _updatePyTrace(trace, trace->_trace);
     Py_RETURN_NONE;
 }
 
@@ -85,7 +85,7 @@ PyObject* PyAPIGetServiceErrorCountersObj(PyAnalyzer* self, PyObject* args) {
     }
     ServiceErrorCounters* counters = APIGetServiceErrorCounters(self->analyzer, serviceName);
     PyCounters* pyCounters = (PyCounters*)PyObject_CallObject((PyObject*)&PyCountersType, NULL);
-    setCounters4PyCounters(pyCounters, counters);
+    _updatePyCounter(pyCounters, counters);
     return (PyObject*)pyCounters;
 }
 
@@ -109,7 +109,7 @@ PyObject* PyAPIGetAllServiceErrorCountersObj(PyAnalyzer* self) {
         ServiceErrorCounters* countersCopy = (ServiceErrorCounters*)malloc(sizeof(ServiceErrorCounters));
         InitServiceErrorCounters(countersCopy);
         CopyServiceErrorCounters(countersCopy, countersArr->errorCounters[i]);
-        Counters2PyCounters((PyCounters*)tmpCounters, countersCopy);
+        _updatePyCounter((PyCounters*)tmpCounters, countersCopy);
         ((PyCounters*)tmpCounters)->ownsStatusCounter = true;
         PyDict_SetItemString(
             dict,
@@ -129,7 +129,7 @@ PyObject* PyAPIGetServiceObj(PyAnalyzer* self, PyObject* args) {
     }
     Service* service = GetAddService(self->analyzer, serviceName);
     PyService* pyService = (PyService*)PyObject_CallObject((PyObject*)&PyServiceType, NULL);
-    setService4PyService(pyService, service);
+    _updatePyService(pyService, service);
     return (PyObject*)pyService;
 }
 
@@ -142,7 +142,7 @@ PyObject* PyAPIGetAllServiceObj(PyAnalyzer* self) {
     while((hashmap_iter(self->analyzer->serviceMap, &iter, &item))) {
         e = (struct StringToService*)item;
         PyService* pyService = (PyService*)PyObject_CallObject((PyObject*)&PyServiceType, NULL);
-        setService4PyService(pyService, e->service);
+        _updatePyService(pyService, e->service);
         PyList_SetItem(list, counter, (PyObject*)pyService);
         counter++;
     }

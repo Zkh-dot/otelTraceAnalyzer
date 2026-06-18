@@ -5,14 +5,6 @@ ServiceErrorCounters* PyCounters2Counters(PyObject* src) {
     return ((PyCounters*)src)->_statusCounter;
 }
 
-PyObject* Counters2PyCounters(PyCounters* dst, ServiceErrorCounters* src) {
-    // PyCounters* pyCounters = (PyCounters*)PyType_GenericAlloc(&PyCountersType, 0);
-    // Py_INCREF(pyCounters);
-    setCounters4PyCounters(dst, src);
-    return (PyObject*)dst;
-}
-
-
 PyObject* Counters2Dict(ServiceErrorCounters* counters) {
     PyObject* dict = PyDict_New();
     for(int i = 0; i < TraceOk + 1; i++) {
@@ -51,13 +43,6 @@ PyObject* Counters2Dict(ServiceErrorCounters* counters) {
 
 Trace* PyTrace2Trace(PyObject* src) {
     return ((PyTrace*)src)->_trace;
-}
-
-PyObject* Trace2PyTrace(PyTrace* dst, Trace* src) {
-    // PyTrace* pyTrace = (PyTrace*)PyTrace_new(&PyTraceType, NULL, NULL);
-    // Py_INCREF(pyTrace);
-    dst->_trace = src;
-    return (PyObject*)dst;
 }
 
 // Service* PyService2Service(PyObject* service) {

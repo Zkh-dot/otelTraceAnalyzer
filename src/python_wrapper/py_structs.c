@@ -44,7 +44,7 @@ int PyCounters_init(PyCounters* self, PyObject* args, PyObject* kwds) {
     return 0;
 }
 
-void _updateCounter(PyCounters* self) {
+static void _updatePyCounterFields(PyCounters* self) {
     self->badTraceCount =       Py_BuildValue("i", self->_statusCounter->badTraceCount);
     self->mySpanCount =         Py_BuildValue("i", self->_statusCounter->mySpanCount);
     self->notmySpanCount =      Py_BuildValue("i", self->_statusCounter->notmySpanCount);
@@ -80,7 +80,7 @@ void _updateCounter(PyCounters* self) {
     }
 }
 
-void _rupdateCounter(PyCounters* self) {
+void _updateCCounter(PyCounters* self) {
     self->_statusCounter->badTraceCount =       (int)PyLong_AsLong(self->badTraceCount);
     self->_statusCounter->mySpanCount =         (int)PyLong_AsLong(self->mySpanCount);
     self->_statusCounter->notmySpanCount =      (int)PyLong_AsLong(self->notmySpanCount);
@@ -100,10 +100,10 @@ void _rupdateCounter(PyCounters* self) {
     }
 }
 
-void setCounters4PyCounters(PyCounters* self, ServiceErrorCounters* counters) {
+void _updatePyCounter(PyCounters* self, ServiceErrorCounters* counters) {
     self->_statusCounter = counters;
     self->ownsStatusCounter = false;
-    _updateCounter(self);
+    _updatePyCounterFields(self);
 }
 
 PyMethodDef PyCounters_methods[] = {
@@ -187,13 +187,7 @@ static PyObject* py_string_or_empty(const char* value) {
     return PyUnicode_FromString(value != NULL ? value : "");
 }
 
-void _updateSpan(PySpan* self) {
-    if (self->_span != NULL) {
-        setSpan4PySpan(self, self->_span);
-    }
-}
-
-void setSpan4PySpan(PySpan* self, Span* span) {
+void _updatePySpan(PySpan* self, Span* span) {
     self->_span = span;
     if (replace_object_field(&self->spanId, py_string_or_empty(span != NULL ? span->spanId : NULL)) < 0) {
         return;
@@ -277,7 +271,7 @@ int PyTrace_init(PyTrace* self, PyObject* args, PyObject* kwds) {
     return 0;
 }
 
-void _updateTrace(PyTrace* self) {
+void _updateCTrace(PyTrace* self) {
     self->_trace = (Trace*)malloc(sizeof(Trace));
     char* traceString = (char*)PyUnicode_AsUTF8(self->traceString);
     char* serviceName = (char*)PyUnicode_AsUTF8(self->serviceName);
@@ -285,7 +279,8 @@ void _updateTrace(PyTrace* self) {
     InitTrace(self->_trace, traceString, serviceName, traceId);
 }
 
-void _rupdateTrace(PyTrace* self) {
+void _updatePyTrace(PyTrace* self, Trace* trace) {
+    self->_trace = trace;
     if (self->_trace == NULL) {
         return;
     }
@@ -319,7 +314,7 @@ void _rupdateTrace(PyTrace* self) {
             Py_DECREF(spansList);
             return;
         }
-        setSpan4PySpan(pySpan, self->_trace->spans[i]);
+        _updatePySpan(pySpan, self->_trace->spans[i]);
         if (PyList_Append(spansList, (PyObject*)pySpan) < 0) {
             Py_DECREF(pySpan);
             Py_DECREF(serviceName);
@@ -382,13 +377,13 @@ int PyService_init(PyService* self, PyObject* args, PyObject* kwds) {
     return 0;    
 }
 
-void _updateService(PyService* self) {
+void _updateCService(PyService* self) {
     self->_service = (Service*)malloc(sizeof(Service));
     char* serviceName = (char*)PyUnicode_AsUTF8(self->serviceName);
     InitService(self->_service, serviceName);
 }
 
-void setService4PyService(PyService* self, Service* service) {
+void _updatePyService(PyService* self, Service* service) {
     PyObject* serviceName = PyUnicode_FromString(service->serviceName);
     if (serviceName == NULL) {
         return;
@@ -409,7 +404,7 @@ void setService4PyService(PyService* self, Service* service) {
     }
     InitServiceErrorCounters(countersCopy);
     CopyServiceErrorCounters(countersCopy, service->errorCounters);
-    setCounters4PyCounters(errorCounters, countersCopy);
+    _updatePyCounter(errorCounters, countersCopy);
     errorCounters->ownsStatusCounter = true;
 
     self->_service = service;
