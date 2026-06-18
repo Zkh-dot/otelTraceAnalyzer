@@ -1,1 +1,1 @@
-from .otelanalyzer import Analyzer, Trace, Service, Counters, PluginManager
+from .otelanalyzer import Analyzer, Trace, Span, Service, Counters, PluginManager

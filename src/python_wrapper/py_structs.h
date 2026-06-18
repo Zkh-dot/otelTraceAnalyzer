@@ -33,11 +33,9 @@ PyObject* PyCounters_new(PyTypeObject* type, PyObject* args, PyObject* kwds);
 
 int PyCounters_init(PyCounters* self, PyObject* args, PyObject* kwds);
 
-void _updateCounter(PyCounters* self);
+void _updatePyCounter(PyCounters* self, ServiceErrorCounters* counters);
 
-void _rupdateCounter(PyCounters* self);
-
-void setCounters4PyCounters(PyCounters* self, ServiceErrorCounters* counters);
+void _updateCCounter(PyCounters* self);
 
 extern PyMethodDef PyCounters_methods[1];
 
@@ -62,11 +60,11 @@ PyObject* PySpan_new(PyTypeObject* type, PyObject* args, PyObject* kwds);
 
 int PySpan_init(PySpan* self, PyObject* args, PyObject* kwds);
 
-void _updateSpan(PySpan* self);
+void _updatePySpan(PySpan* self, Span* span);
 
 extern PyMethodDef PySpan_methods[1];
 
-extern PyMemberDef PySpan_members[4];
+extern PyMemberDef PySpan_members[5];
 
 extern PyTypeObject PySpanType;
 
@@ -87,9 +85,9 @@ PyObject* PyTrace_new(PyTypeObject* type, PyObject* args, PyObject* kwds);
 
 int PyTrace_init(PyTrace* self, PyObject* args, PyObject* kwds);
 
-void _updateTrace(PyTrace* self);
+void _updateCTrace(PyTrace* self);
 
-void _rupdateTrace(PyTrace* self);
+void _updatePyTrace(PyTrace* self, Trace* trace);
 
 extern PyMethodDef PyTrace_methods[1];
 
@@ -111,9 +109,9 @@ PyObject* PyService_new(PyTypeObject* type, PyObject* args, PyObject* kwds);
 
 int PyService_init(PyService* self, PyObject* args, PyObject* kwds);
 
-void _updateService(PyService* self);
+void _updateCService(PyService* self);
 
-void setService4PyService(PyService* self, Service* service);
+void _updatePyService(PyService* self, Service* service);
 
 PyObject* PyService_is_ok(PyService* self, PyObject* ignored);
 

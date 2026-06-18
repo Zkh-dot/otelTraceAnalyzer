@@ -35,11 +35,20 @@ class Analyzer:
     def get_all_services(self) -> list[Service]:
         ...
 
+class Span:
+    spanId: str
+    serviceName: str
+    parentSpanId: str
+    traceId: str
+    def __init__(self) -> None:
+        ...
+
 class Trace:
     traceString: str
     traceId: str
     serviceName: str
     spansCount: int
+    spansList: list[Span]
     def __init__(self, trace_id: str) -> None:
         ...
 

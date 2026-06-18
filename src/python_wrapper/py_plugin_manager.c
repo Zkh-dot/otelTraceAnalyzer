@@ -23,7 +23,7 @@ PyObject* RelevantCounters(Analyzer* a, Trace* t) {
         if(t->spans[i]->serviceName == NULL || t->spans[i]->serviceName[0] == '\0')
             continue;
         PyCounters* pyCounters = (PyCounters*)PyObject_CallObject((PyObject*)&PyCountersType, NULL);
-        setCounters4PyCounters(pyCounters, APIGetServiceErrorCounters(a, t->spans[i]->serviceName));
+        _updatePyCounter(pyCounters, APIGetServiceErrorCounters(a, t->spans[i]->serviceName));
         PyDict_SetItemString(dict, t->spans[i]->serviceName, (PyObject*)pyCounters);
         Py_DECREF(pyCounters);
     }
@@ -34,7 +34,7 @@ void UpdateRelevantCounters(Analyzer* a, PyObject* dict) {
     PyObject* key, *value;
     Py_ssize_t pos = 0;
     while(PyDict_Next(dict, &pos, &key, &value)) {
-        _rupdateCounter((PyCounters*)value);
+        _updateCCounter((PyCounters*)value);
     }
 }
 
@@ -54,7 +54,7 @@ void RunPyPlugins(pyPluginManager* self, Analyzer* a, Trace* t) {
     PyObject* tmpTrace = PyObject_CallObject((PyObject*)&PyTraceType, NULL);
     while(tmp != NULL) {
         PyObject* pyPlugin = tmp->pyPlugin;
-        tmpTrace = Trace2PyTrace((PyTrace*)tmpTrace, t);
+        _updatePyTrace((PyTrace*)tmpTrace, t);
         PyObject* result = PyObject_CallFunction(
             pyPlugin,
             "OO",
