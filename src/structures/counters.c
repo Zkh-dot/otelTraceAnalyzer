@@ -1,24 +1,18 @@
 #include "counters.h"
+#include <string.h>
 
-void InitServiceErrorCounters(ServiceErrorCounters* counters) {
-    for(int i = 0; i < TraceOk + 1; i++) {
-        counters->statusCounter[i] = 0;
-    }
+void InitServiceCounters(ServiceCounters* counters) {
+    counters->myExamplesCount = 0;
+    counters->notmyExamplesCount = 0;
+    counters->mySpanCount = 0;
+    counters->notmySpanCount = 0;
     for(int i = 0; i < EXAMPLES_LENGTH; i++) {
         counters->myBadTraceExamples[i] = NULL;
         counters->notmyBadTraceExamples[i] = NULL;
     }
-    counters->serviceName = NULL;
-    counters->myExamplesCount = 0;
-    counters->notmyExamplesCount = 0;
-    counters->badTraceCount = 0;
-    counters->mySpanCount = 0;
-    counters->notmySpanCount = 0;
-    counters->traceCount = 0;
-    counters->inTraceSpanCount = 0;
 }
 
-void FreeServiceErrorCounters(ServiceErrorCounters* counters) {
+void FreeServiceCounters(ServiceCounters* counters) {
     for(int i = 0; i < counters->myExamplesCount; i++) {
         if(counters->myBadTraceExamples[i] != NULL)
             free(counters->myBadTraceExamples[i]);
@@ -27,15 +21,30 @@ void FreeServiceErrorCounters(ServiceErrorCounters* counters) {
         if(counters->notmyBadTraceExamples[i] != NULL)
             free(counters->notmyBadTraceExamples[i]);
     }
+}
+
+void InitServiceErrorCounters(ServiceErrorCounters* counters) {
+    for(int i = 0; i < TraceOk + 1; i++) {
+        counters->myTraceStatusCounter[i] = 0;
+        counters->notmyTraceStatusCounter[i] = 0;
+    }
+    counters->serviceName = NULL;
+    counters->traceCount = 0;
+    counters->inTraceSpanCount = 0;
+    counters->badTraceCount = 0;
+    InitServiceCounters(&counters->myTraceServiceCounters);
+    InitServiceCounters(&counters->notmyTraceServiceCounters);
+}
+
+void FreeServiceErrorCounters(ServiceErrorCounters* counters) {
     if(counters->serviceName != NULL)
         free(counters->serviceName);
+    FreeServiceCounters(&counters->myTraceServiceCounters);
+    FreeServiceCounters(&counters->notmyTraceServiceCounters);
     free(counters);
 }
 
-void CopyServiceErrorCounters(ServiceErrorCounters* dst, ServiceErrorCounters* src) {
-    for(int i = 0; i < TraceOk + 1; i++) {
-        dst->statusCounter[i] = src->statusCounter[i];
-    }
+static void CopyServiceCounters(ServiceCounters* dst, ServiceCounters* src) {
     for(int i = 0; i < src->myExamplesCount; i++) {
         if(src->myBadTraceExamples[i] != NULL)
             dst->myBadTraceExamples[i] = strdup(src->myBadTraceExamples[i]);
@@ -44,95 +53,104 @@ void CopyServiceErrorCounters(ServiceErrorCounters* dst, ServiceErrorCounters* s
         if(src->notmyBadTraceExamples[i] != NULL)
             dst->notmyBadTraceExamples[i] = strdup(src->notmyBadTraceExamples[i]);
     }
-    if(src->serviceName != NULL)
-        dst->serviceName = strdup(src->serviceName);
     dst->myExamplesCount = src->myExamplesCount;
     dst->notmyExamplesCount = src->notmyExamplesCount;
-    dst->badTraceCount = src->badTraceCount;
     dst->mySpanCount = src->mySpanCount;
     dst->notmySpanCount = src->notmySpanCount;
+}
+
+void CopyServiceErrorCounters(ServiceErrorCounters* dst, ServiceErrorCounters* src) {
+    for(int i = 0; i < TraceOk + 1; i++) {
+        dst->myTraceStatusCounter[i] = src->myTraceStatusCounter[i];
+        dst->notmyTraceStatusCounter[i] = src->notmyTraceStatusCounter[i];
+    }
+    if(src->serviceName != NULL)
+        dst->serviceName = strdup(src->serviceName);
     dst->traceCount = src->traceCount;
     dst->inTraceSpanCount = src->inTraceSpanCount;
+    dst->badTraceCount = src->badTraceCount;
+    CopyServiceCounters(&dst->myTraceServiceCounters, &src->myTraceServiceCounters);
+    CopyServiceCounters(&dst->notmyTraceServiceCounters, &src->notmyTraceServiceCounters);
 }
 
 void sumCounters(ServiceErrorCounters* dst, ServiceErrorCounters* src) {
     for(int i = 0; i < TraceOk + 1; i++) {
-        dst->statusCounter[i] += src->statusCounter[i];
+        dst->myTraceStatusCounter[i] += src->myTraceStatusCounter[i];
+        dst->notmyTraceStatusCounter[i] += src->notmyTraceStatusCounter[i];
     }
 }
 
-void IncCounters(ServiceErrorCounters* errorCounters, SpanStatusTypes status, bool isMy) {
+void IncCounters(ServiceErrorCounters* errorCounters, SpanStatusTypes status, bool isMyTrace, bool isMySpan) {
+    int* counterPointer = isMyTrace ? errorCounters->myTraceStatusCounter : errorCounters->notmyTraceStatusCounter;
     switch (status)
     {
     case MissingParent:
-        errorCounters->statusCounter[myMissingParent + !isMy]++;
+        counterPointer[myMissingParent + !isMySpan]++;
         break;
     case NoParentInTrace:
-        errorCounters->statusCounter[myNoParentInTrace + !isMy]++;
+        counterPointer[myNoParentInTrace + !isMySpan]++;
         break;
     case DublicateSpan: 
-        errorCounters->statusCounter[myDublicateSpan + !isMy]++;
+        counterPointer[myDublicateSpan + !isMySpan]++;
         break;
     case BadSpanIdSize:
-        errorCounters->statusCounter[myBadSpanIdSize + !isMy]++;
+        counterPointer[myBadSpanIdSize + !isMySpan]++;
         break;
     case NoServiceName:
-        errorCounters->statusCounter[noServiceNameSpan]++;
+        counterPointer[noServiceNameSpan]++;
         break;
     case SpanOk:
-        errorCounters->statusCounter[TraceOk]++;
+        counterPointer[TraceOk]++;
+        break;
+    case SelfParent:
+        counterPointer[myMissingParent + !isMySpan]++;
         break;
     default:
         break;
     }
 }
 
-void DecCounters(ServiceErrorCounters* errorCounters, SpanStatusTypes status, bool isMy) {
+void DecCounters(ServiceErrorCounters* errorCounters, SpanStatusTypes status, bool isMyTrace, bool isMySpan) {
+    int* counterPointer = isMyTrace ? errorCounters->myTraceStatusCounter : errorCounters->notmyTraceStatusCounter;
     switch (status)
     {
     case MissingParent:
-        errorCounters->statusCounter[myMissingParent + !isMy]--;
+        counterPointer[myMissingParent + !isMySpan]--;
         break;
     case NoParentInTrace:
-        errorCounters->statusCounter[myNoParentInTrace + !isMy]--;
+        counterPointer[myNoParentInTrace + !isMySpan]--;
         break;
     case DublicateSpan: 
-        errorCounters->statusCounter[myDublicateSpan + !isMy]--;
+        counterPointer[myDublicateSpan + !isMySpan]--;
         break;
     case BadSpanIdSize:
-        errorCounters->statusCounter[myBadSpanIdSize + !isMy]--;
+        counterPointer[myBadSpanIdSize + !isMySpan]--;
         break;
     case NoServiceName:
-        errorCounters->statusCounter[noServiceNameSpan]--;
+        counterPointer[noServiceNameSpan]--;
         break;
     case SpanOk:
-        errorCounters->statusCounter[TraceOk]--;
+        counterPointer[TraceOk]--;
+        break;
+    case SelfParent:
+        counterPointer[myMissingParent + !isMySpan]--;
         break;
     default:
         break;
     }
 }
 
-void AppendExample(ServiceErrorCounters* errorCounters, const char* traceId, bool isMy) {
-    if(isMy) {
-        if(errorCounters->myExamplesCount < EXAMPLES_LENGTH) {
-            errorCounters->myBadTraceExamples[errorCounters->myExamplesCount] = strdup(traceId);
-            errorCounters->myExamplesCount++;
-        }
-    } else {
-        if(errorCounters->notmyExamplesCount < EXAMPLES_LENGTH) {
-            errorCounters->notmyBadTraceExamples[errorCounters->notmyExamplesCount] = strdup(traceId);
-            errorCounters->notmyExamplesCount++;
-        }
+void AppendExample(ServiceErrorCounters* errorCounters, const char* traceId, bool isMyTrace, bool isMySpan) {
+    ServiceCounters* serviceCounterPointer = isMyTrace ? &errorCounters->myTraceServiceCounters : &errorCounters->notmyTraceServiceCounters;
+    int* examplesCount = isMySpan ? &serviceCounterPointer->myExamplesCount : &serviceCounterPointer->notmyExamplesCount;
+    char** badTraceExamples = isMySpan ? serviceCounterPointer->myBadTraceExamples : serviceCounterPointer->notmyBadTraceExamples;
+    if(
+        *examplesCount < EXAMPLES_LENGTH
+        && (*examplesCount == 0 ? true : strcmp(badTraceExamples[*examplesCount - 1], traceId) != 0)
+    ) {
+        badTraceExamples[*examplesCount] = strdup(traceId);
+        (*examplesCount)++;
     }
-}
-
-bool IsRootSpanError(ServiceErrorCounters* errorCounters) {
-    int changed = 0;
-    for(int i = 0; i < TraceOk; i++) {
-        changed += errorCounters->statusCounter[i];
-    }
-    return ((changed == 1) && errorCounters->statusCounter[myMissingParent] == 1) || changed == 0;
 }
 
 void FreeCountersArr(CountersArr* countersArr) {

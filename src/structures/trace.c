@@ -142,6 +142,7 @@ void InitTrace(
     trace->serviceName = strdup(serviceName);
     trace->traceId = strdup(traceId);
     trace->spanIds = hashset_create();
+    trace->goodTrace = true;
 }
 
 void FreeTrace(Trace* trace) {

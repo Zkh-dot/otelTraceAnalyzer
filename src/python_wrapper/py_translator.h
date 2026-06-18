@@ -8,7 +8,7 @@
 #include "../structures/servicemap.h"
 
 
-ServiceErrorCounters* PyCounters2Counters(PyObject* src);
+ServiceErrorCounters* PyServiceErrorCounters2Counters(PyObject* src);
 
 PyObject* Counters2Dict(ServiceErrorCounters* Counters);
 

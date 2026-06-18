@@ -84,7 +84,7 @@ PyObject* PyAPIGetServiceErrorCountersObj(PyAnalyzer* self, PyObject* args) {
         return NULL;
     }
     ServiceErrorCounters* counters = APIGetServiceErrorCounters(self->analyzer, serviceName);
-    PyCounters* pyCounters = (PyCounters*)PyObject_CallObject((PyObject*)&PyCountersType, NULL);
+    PyServiceErrorCounters* pyCounters = (PyServiceErrorCounters*)PyObject_CallObject((PyObject*)&PyServiceErrorCountersType, NULL);
     _updatePyCounter(pyCounters, counters);
     return (PyObject*)pyCounters;
 }
@@ -105,12 +105,12 @@ PyObject* PyAPIGetAllServiceErrorCountersObj(PyAnalyzer* self) {
     CountersArr* countersArr = APIGetAllServiceErrorCounters(self->analyzer);
     PyObject* dict = PyDict_New();
     for(int i = 0; i < countersArr->errorCountersCount; i++) {
-        PyObject* tmpCounters = PyObject_CallObject((PyObject*)&PyCountersType, NULL);
+        PyObject* tmpCounters = PyObject_CallObject((PyObject*)&PyServiceErrorCountersType, NULL);
         ServiceErrorCounters* countersCopy = (ServiceErrorCounters*)malloc(sizeof(ServiceErrorCounters));
         InitServiceErrorCounters(countersCopy);
         CopyServiceErrorCounters(countersCopy, countersArr->errorCounters[i]);
-        _updatePyCounter((PyCounters*)tmpCounters, countersCopy);
-        ((PyCounters*)tmpCounters)->ownsStatusCounter = true;
+        _updatePyCounter((PyServiceErrorCounters*)tmpCounters, countersCopy);
+        ((PyServiceErrorCounters*)tmpCounters)->ownsStatusCounter = true;
         PyDict_SetItemString(
             dict,
             countersArr->errorCounters[i]->serviceName,

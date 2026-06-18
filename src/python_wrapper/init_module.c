@@ -19,7 +19,7 @@ PyMODINIT_FUNC PyInit_otelanalyzer(void) {
         return NULL;
     }
 
-    if (PyType_Ready(&PyCountersType) < 0) {
+    if (PyType_Ready(&PyServiceErrorCountersType) < 0) {
         return NULL;
     }
 
@@ -58,7 +58,7 @@ PyMODINIT_FUNC PyInit_otelanalyzer(void) {
         Py_DECREF(m);
         return NULL;
     }
-    PyObject* counters_obj = (PyObject*)&PyCountersType;
+    PyObject* counters_obj = (PyObject*)&PyServiceErrorCountersType;
     if(PyModule_AddObject(m, "Counters", counters_obj) < 0) {
         Py_DECREF(m);
         return NULL;

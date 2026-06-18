@@ -15,6 +15,7 @@ typedef struct {
     char* serviceName;
     char* traceId;
     int spansCount;
+    bool goodTrace;
     hashset_t spanIds;
     Span** spans;
 } Trace;

@@ -27,9 +27,9 @@ class CounterSemanticsTest(unittest.TestCase):
         frontend = analyzer.get_counters("frontend")
 
         self.assertEqual(frontend["traceCount"], 1)
-        self.assertEqual(frontend["mySpanCount"], 1)
+        self.assertEqual(frontend["my-traces"]["mySpanCount"], 1)
         self.assertEqual(frontend["inTraceSpanCount"], 2)
-        self.assertEqual(frontend["myNoParentInTrace"], 0)
+        self.assertEqual(frontend["my-traces"]["statusCounters"]["myNoParentInTrace"], 0)
 
     def test_other_services_receive_notmy_span_count(self):
         analyzer = Analyzer()
@@ -38,10 +38,10 @@ class CounterSemanticsTest(unittest.TestCase):
         backend = analyzer.get_counters("backend")
 
         self.assertEqual(backend["traceCount"], 0)
-        self.assertEqual(backend["mySpanCount"], 0)
-        self.assertEqual(backend["notmySpanCount"], 1)
-        self.assertEqual(backend["notmyNoParentInTrace"], 0)
-        self.assertEqual(backend["notmyExamples"], [])
+        self.assertEqual(backend["my-traces"]["mySpanCount"], 0)
+        self.assertEqual(backend["notmy-traces"]["mySpanCount"], 1)
+        self.assertEqual(backend["notmy-traces"]["statusCounters"]["myNoParentInTrace"], 0)
+        self.assertEqual(backend["notmy-traces"]["myExamples"], [])
 
     def test_other_service_parent_error_uses_notmy_counter(self):
         analyzer = Analyzer()
@@ -49,8 +49,8 @@ class CounterSemanticsTest(unittest.TestCase):
 
         backend = analyzer.get_counters("backend")
 
-        self.assertEqual(backend["notmyNoParentInTrace"], 1)
-        self.assertEqual(backend["notmyExamples"], ["2" * 32])
+        self.assertEqual(backend["notmy-traces"]["statusCounters"]["myNoParentInTrace"], 1)
+        self.assertEqual(backend["notmy-traces"]["myExamples"], ["2" * 32])
 
     def test_all_counters_obj_exposes_new_fields(self):
         analyzer = Analyzer()
@@ -59,11 +59,11 @@ class CounterSemanticsTest(unittest.TestCase):
         counters = analyzer.get_all_counters_obj()
 
         self.assertEqual(counters["frontend"].traceCount, 1)
-        self.assertEqual(counters["frontend"].mySpanCount, 1)
+        self.assertEqual(counters["frontend"].myTraces["mySpanCount"], 1)
         self.assertEqual(counters["frontend"].inTraceSpanCount, 2)
         self.assertEqual(counters["backend"].traceCount, 0)
-        self.assertEqual(counters["backend"].mySpanCount, 0)
-        self.assertEqual(counters["backend"].notmySpanCount, 1)
+        self.assertEqual(counters["backend"].myTraces["mySpanCount"], 0)
+        self.assertEqual(counters["backend"].notmyTraces["mySpanCount"], 1)
 
     def test_all_counters_obj_teardown_does_not_crash(self):
         script = textwrap.dedent(
@@ -75,7 +75,7 @@ class CounterSemanticsTest(unittest.TestCase):
             analyzer.analyze({MIXED_TRACE!r}, "frontend", "1" * 32)
             counters = analyzer.get_all_counters_obj()
             assert counters["frontend"].inTraceSpanCount == 2
-            assert counters["backend"].notmySpanCount == 1
+            assert counters["backend"].notmyTraces["mySpanCount"] == 1
             del counters
             del analyzer
             gc.collect()

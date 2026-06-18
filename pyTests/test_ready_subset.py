@@ -15,8 +15,8 @@ class ReadySubsetTest(unittest.TestCase):
         analyzer.analyze(trace, "svc", "1" * 32)
         counters = analyzer.get_counters("svc")
 
-        self.assertEqual(counters["noServiceNameSpan"], 1)
-        self.assertEqual(counters["myExamples"], ["1" * 32])
+        self.assertEqual(counters["my-traces"]["statusCounters"]["noServiceNameSpan"], 1)
+        self.assertEqual(counters["my-traces"]["myExamples"], ["1" * 32])
 
     def test_get_all_counters_returns_independent_dicts(self):
         analyzer = Analyzer()
@@ -24,10 +24,10 @@ class ReadySubsetTest(unittest.TestCase):
 
         analyzer.analyze(trace, "svc", "2" * 32)
         first = analyzer.get_all_counters()
-        first["svc"]["mySpanCount"] = 999
+        first["svc"]["my-traces"]["mySpanCount"] = 999
         second = analyzer.get_all_counters()
 
-        self.assertEqual(second["svc"]["mySpanCount"], 1)
+        self.assertEqual(second["svc"]["my-traces"]["mySpanCount"], 1)
 
     def test_cli_writes_metrics(self):
         payload = {

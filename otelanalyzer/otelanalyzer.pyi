@@ -1,15 +1,28 @@
 from typing import Callable
+from typing import TypedDict
 
-class Counters:
-    statusCounters: list[int]
-    myBadTraceExamples: list[str]
-    notmyBadTraceExamples: list[str]
+class TraceCounters(TypedDict):
+    statusCounters: dict[str, int]
+    myExamples: list[str]
+    notmyExamples: list[str]
     myExamplesCount: int
     notmyExamplesCount: int
-    serviceName: str
-    badTraceCount: int
     mySpanCount: int
     notmySpanCount: int
+
+CountersDict = TypedDict("CountersDict", {
+    "my-traces": TraceCounters,
+    "notmy-traces": TraceCounters,
+    "badTraceCount": int,
+    "traceCount": int,
+    "inTraceSpanCount": int,
+})
+
+class Counters:
+    myTraces: TraceCounters
+    notmyTraces: TraceCounters
+    serviceName: str
+    badTraceCount: int
     traceCount: int
     inTraceSpanCount: int
     def __init__(self) -> None:
@@ -22,11 +35,11 @@ class Analyzer:
         ...
     def analyze_btrace(self, service_name: str) -> None:
         ...
-    def get_counters(self) -> dict[str, int]:
+    def get_counters(self) -> CountersDict:
         ...
     def get_counters_obj(self) -> Counters:
         ...
-    def get_all_counters(self) -> dict[str, dict[str, int]]:
+    def get_all_counters(self) -> dict[str, CountersDict]:
         ...
     def get_all_counters_obj(self) -> dict[str, Counters]:
         ...

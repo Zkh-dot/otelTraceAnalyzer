@@ -14,34 +14,29 @@ typedef struct {
     PyObject_HEAD
     ServiceErrorCounters* _statusCounter;
     bool ownsStatusCounter;
-    PyObject* statusCounter;
-    PyObject* myBadTraceExamples;
-    PyObject* notmyBadTraceExamples;
-    PyObject* myExamplesCount;
-    PyObject* notmyExamplesCount;
+    PyObject* myTraces;
+    PyObject* notmyTraces;
     PyObject* serviceName;
     PyObject* badTraceCount;
-    PyObject* mySpanCount;
-    PyObject* notmySpanCount;
     PyObject* traceCount;
     PyObject* inTraceSpanCount;
-} PyCounters;
+} PyServiceErrorCounters;
 
-void PyCounters_dealloc(PyCounters* self);
+void PyServiceErrorCounters_dealloc(PyServiceErrorCounters* self);
 
-PyObject* PyCounters_new(PyTypeObject* type, PyObject* args, PyObject* kwds);
+PyObject* PyServiceErrorCounters_new(PyTypeObject* type, PyObject* args, PyObject* kwds);
 
-int PyCounters_init(PyCounters* self, PyObject* args, PyObject* kwds);
+int PyServiceErrorCounters_init(PyServiceErrorCounters* self, PyObject* args, PyObject* kwds);
 
-void _updatePyCounter(PyCounters* self, ServiceErrorCounters* counters);
+void _updatePyCounter(PyServiceErrorCounters* self, ServiceErrorCounters* counters);
 
-void _updateCCounter(PyCounters* self);
+void _updateCCounter(PyServiceErrorCounters* self);
 
-extern PyMethodDef PyCounters_methods[1];
+extern PyMethodDef PyServiceErrorCounters_methods[1];
 
-extern PyMemberDef PyCounters_members[12];
+extern PyMemberDef PyServiceErrorCounters_members[7];
 
-extern PyTypeObject PyCountersType;
+extern PyTypeObject PyServiceErrorCountersType;
 
 // span
 
@@ -99,7 +94,7 @@ extern PyTypeObject PyTraceType;
 typedef struct {
     PyObject_HEAD
     Service* _service;
-    PyCounters* errorCounters;
+    PyServiceErrorCounters* errorCounters;
     PyObject* serviceName;
 } PyService;
 

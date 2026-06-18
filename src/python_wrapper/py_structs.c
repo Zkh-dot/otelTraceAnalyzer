@@ -1,142 +1,266 @@
 #include "py_structs.h"
 #include <structmember.h>
 
+static int replace_object_field(PyObject** field, PyObject* value);
+
 // counters
-void PyCounters_dealloc(PyCounters* self) {
+static int set_dict_item_steal(PyObject* dict, const char* key, PyObject* value) {
+    if (value == NULL) {
+        return -1;
+    }
+    int result = PyDict_SetItemString(dict, key, value);
+    Py_DECREF(value);
+    return result;
+}
+
+static PyObject* TraceStatusCounters2Dict(int* statusCounters) {
+    PyObject* dict = PyDict_New();
+    if (dict == NULL) {
+        return NULL;
+    }
+
+    for(int i = 0; i < TraceOk + 1; i++) {
+        if (set_dict_item_steal(dict, traceStatusMessage[i], PyLong_FromLong(statusCounters[i])) < 0) {
+            Py_DECREF(dict);
+            return NULL;
+        }
+    }
+
+    return dict;
+}
+
+static PyObject* BadTraceExamples2List(char** examples, int examplesCount) {
+    PyObject* list = PyList_New(examplesCount);
+    if (list == NULL) {
+        return NULL;
+    }
+
+    for(int i = 0; i < examplesCount; i++) {
+        PyObject* value = PyUnicode_FromString(examples[i] != NULL ? examples[i] : "");
+        if (value == NULL) {
+            Py_DECREF(list);
+            return NULL;
+        }
+        PyList_SET_ITEM(list, i, value);
+    }
+
+    return list;
+}
+
+static PyObject* ServiceCounters2Dict(ServiceCounters* counters, int* statusCounters) {
+    PyObject* dict = PyDict_New();
+    if (dict == NULL) {
+        return NULL;
+    }
+
+    if (
+        set_dict_item_steal(dict, "statusCounters", TraceStatusCounters2Dict(statusCounters)) < 0 ||
+        set_dict_item_steal(dict, "myExamples", BadTraceExamples2List(counters->myBadTraceExamples, counters->myExamplesCount)) < 0 ||
+        set_dict_item_steal(dict, "notmyExamples", BadTraceExamples2List(counters->notmyBadTraceExamples, counters->notmyExamplesCount)) < 0 ||
+        set_dict_item_steal(dict, "myExamplesCount", PyLong_FromLong(counters->myExamplesCount)) < 0 ||
+        set_dict_item_steal(dict, "notmyExamplesCount", PyLong_FromLong(counters->notmyExamplesCount)) < 0 ||
+        set_dict_item_steal(dict, "mySpanCount", PyLong_FromLong(counters->mySpanCount)) < 0 ||
+        set_dict_item_steal(dict, "notmySpanCount", PyLong_FromLong(counters->notmySpanCount)) < 0
+    ) {
+        Py_DECREF(dict);
+        return NULL;
+    }
+
+    return dict;
+}
+
+static int update_int_from_dict(PyObject* dict, const char* key, int* target) {
+    PyObject* value = PyDict_GetItemString(dict, key);
+    if (value == NULL) {
+        return 0;
+    }
+    long parsed = PyLong_AsLong(value);
+    if (PyErr_Occurred()) {
+        return -1;
+    }
+    *target = (int)parsed;
+    return 0;
+}
+
+static int update_examples_from_list(char** examples, int* examplesCount, PyObject* list) {
+    if (list == NULL) {
+        return 0;
+    }
+    if (!PyList_Check(list)) {
+        PyErr_SetString(PyExc_TypeError, "examples must be lists");
+        return -1;
+    }
+
+    for (int i = 0; i < *examplesCount && i < EXAMPLES_LENGTH; i++) {
+        free(examples[i]);
+        examples[i] = NULL;
+    }
+
+    Py_ssize_t listSize = PyList_Size(list);
+    int newCount = listSize < EXAMPLES_LENGTH ? (int)listSize : EXAMPLES_LENGTH;
+    for (int i = 0; i < newCount; i++) {
+        const char* value = PyUnicode_AsUTF8(PyList_GetItem(list, i));
+        if (value == NULL) {
+            return -1;
+        }
+        examples[i] = strdup(value);
+    }
+    *examplesCount = newCount;
+    return 0;
+}
+
+static int UpdateServiceCountersFromDict(ServiceCounters* counters, int* statusCounters, PyObject* dict) {
+    if (dict == NULL) {
+        return 0;
+    }
+    if (!PyDict_Check(dict)) {
+        PyErr_SetString(PyExc_TypeError, "trace counters must be dictionaries");
+        return -1;
+    }
+
+    PyObject* statusDict = PyDict_GetItemString(dict, "statusCounters");
+    if (statusDict != NULL) {
+        if (!PyDict_Check(statusDict)) {
+            PyErr_SetString(PyExc_TypeError, "statusCounters must be a dictionary");
+            return -1;
+        }
+        for (int i = 0; i < TraceOk + 1; i++) {
+            PyObject* value = PyDict_GetItemString(statusDict, traceStatusMessage[i]);
+            if (value != NULL) {
+                long parsed = PyLong_AsLong(value);
+                if (PyErr_Occurred()) {
+                    return -1;
+                }
+                statusCounters[i] = (int)parsed;
+            }
+        }
+    }
+
+    if (
+        update_examples_from_list(counters->myBadTraceExamples, &counters->myExamplesCount, PyDict_GetItemString(dict, "myExamples")) < 0 ||
+        update_examples_from_list(counters->notmyBadTraceExamples, &counters->notmyExamplesCount, PyDict_GetItemString(dict, "notmyExamples")) < 0 ||
+        update_int_from_dict(dict, "mySpanCount", &counters->mySpanCount) < 0 ||
+        update_int_from_dict(dict, "notmySpanCount", &counters->notmySpanCount) < 0
+    ) {
+        return -1;
+    }
+
+    return 0;
+}
+
+void PyServiceErrorCounters_dealloc(PyServiceErrorCounters* self) {
     if(self->ownsStatusCounter)
         FreeServiceErrorCounters(self->_statusCounter);
-    Py_DECREF(self->myBadTraceExamples);
-    Py_DECREF(self->notmyBadTraceExamples);
-    Py_DECREF(self->myExamplesCount);
-    Py_DECREF(self->notmyExamplesCount);
-    Py_DECREF(self->serviceName);
-    Py_DECREF(self->badTraceCount);
-    Py_DECREF(self->mySpanCount);
-    Py_DECREF(self->notmySpanCount);
-    Py_DECREF(self->traceCount);
-    Py_DECREF(self->inTraceSpanCount);
-    Py_DECREF(self->statusCounter);
+    Py_XDECREF(self->myTraces);
+    Py_XDECREF(self->notmyTraces);
+    Py_XDECREF(self->serviceName);
+    Py_XDECREF(self->badTraceCount);
+    Py_XDECREF(self->traceCount);
+    Py_XDECREF(self->inTraceSpanCount);
     Py_TYPE(self)->tp_free((PyObject*)self);
 }
 
-PyObject* PyCounters_new(PyTypeObject* type, PyObject* args, PyObject* kwds) {
-    PyCounters* self;
-    self = (PyCounters*)type->tp_alloc(type, 0);
+PyObject* PyServiceErrorCounters_new(PyTypeObject* type, PyObject* args, PyObject* kwds) {
+    PyServiceErrorCounters* self;
+    self = (PyServiceErrorCounters*)type->tp_alloc(type, 0);
     if (self != NULL) {
-        self->myBadTraceExamples = PyList_New(0);
         self->_statusCounter = NULL;
         self->ownsStatusCounter = false;
-        self->statusCounter = PyDict_New();
-        self->notmyBadTraceExamples = PyList_New(0);
-        self->myExamplesCount = PyLong_FromLong(0);
-        self->notmyExamplesCount = PyLong_FromLong(0);
+        self->myTraces = PyDict_New();
+        self->notmyTraces = PyDict_New();
         self->serviceName = PyUnicode_FromString("");
         self->badTraceCount = PyLong_FromLong(0);
-        self->mySpanCount = PyLong_FromLong(0);
-        self->notmySpanCount = PyLong_FromLong(0);
         self->traceCount = PyLong_FromLong(0);
         self->inTraceSpanCount = PyLong_FromLong(0);
+        if (
+            self->myTraces == NULL ||
+            self->notmyTraces == NULL ||
+            self->serviceName == NULL ||
+            self->badTraceCount == NULL ||
+            self->traceCount == NULL ||
+            self->inTraceSpanCount == NULL
+        ) {
+            Py_DECREF(self);
+            return NULL;
+        }
     }
     return (PyObject*)self;
 }
 
-int PyCounters_init(PyCounters* self, PyObject* args, PyObject* kwds) {
+int PyServiceErrorCounters_init(PyServiceErrorCounters* self, PyObject* args, PyObject* kwds) {
     return 0;
 }
 
-static void _updatePyCounterFields(PyCounters* self) {
-    self->badTraceCount =       Py_BuildValue("i", self->_statusCounter->badTraceCount);
-    self->mySpanCount =         Py_BuildValue("i", self->_statusCounter->mySpanCount);
-    self->notmySpanCount =      Py_BuildValue("i", self->_statusCounter->notmySpanCount);
-    self->traceCount =          Py_BuildValue("i", self->_statusCounter->traceCount);
-    self->inTraceSpanCount =    Py_BuildValue("i", self->_statusCounter->inTraceSpanCount);
-    self->myExamplesCount =     Py_BuildValue("i", self->_statusCounter->myExamplesCount);
-    self->notmyExamplesCount =  Py_BuildValue("i", self->_statusCounter->notmyExamplesCount);
-
-    self->myBadTraceExamples = PyList_New(0);
-    self->notmyBadTraceExamples = PyList_New(0);
-    self->statusCounter = PyDict_New();
-
-    for (int i = 0; i < self->_statusCounter->myExamplesCount; i++) {
-        PyList_Append(
-            self->myBadTraceExamples,
-            Py_BuildValue(
-                "s",
-                self->_statusCounter->myBadTraceExamples[i],
-                strlen(self->_statusCounter->myBadTraceExamples[i])
-            )
-        );
-    }
-    for (int i = 0; i < self->_statusCounter->notmyExamplesCount; i++) {
-        PyList_Append(self->notmyBadTraceExamples, Py_BuildValue("s", self->_statusCounter->notmyBadTraceExamples[i], strlen(self->_statusCounter->notmyBadTraceExamples[i])));
-    }
-    
-    for(int i = 0; i < TraceOk + 1; i++) {
-        PyDict_SetItem(
-            self->statusCounter,
-            Py_BuildValue("s", traceStatusMessage[i], strlen(traceStatusMessage[i])),
-            Py_BuildValue("i", self->_statusCounter->statusCounter[i])
-        );
-    }
+static void _updatePyCounterFields(PyServiceErrorCounters* self) {
+    replace_object_field(&self->myTraces, ServiceCounters2Dict(
+        &self->_statusCounter->myTraceServiceCounters,
+        self->_statusCounter->myTraceStatusCounter
+    ));
+    replace_object_field(&self->notmyTraces, ServiceCounters2Dict(
+        &self->_statusCounter->notmyTraceServiceCounters,
+        self->_statusCounter->notmyTraceStatusCounter
+    ));
+    replace_object_field(&self->badTraceCount, PyLong_FromLong(self->_statusCounter->badTraceCount));
+    replace_object_field(&self->traceCount, PyLong_FromLong(self->_statusCounter->traceCount));
+    replace_object_field(&self->inTraceSpanCount, PyLong_FromLong(self->_statusCounter->inTraceSpanCount));
+    replace_object_field(&self->serviceName, PyUnicode_FromString(self->_statusCounter->serviceName != NULL ? self->_statusCounter->serviceName : ""));
 }
 
-void _updateCCounter(PyCounters* self) {
-    self->_statusCounter->badTraceCount =       (int)PyLong_AsLong(self->badTraceCount);
-    self->_statusCounter->mySpanCount =         (int)PyLong_AsLong(self->mySpanCount);
-    self->_statusCounter->notmySpanCount =      (int)PyLong_AsLong(self->notmySpanCount);
-    self->_statusCounter->traceCount =          (int)PyLong_AsLong(self->traceCount);
-    self->_statusCounter->inTraceSpanCount =    (int)PyLong_AsLong(self->inTraceSpanCount);
-    self->_statusCounter->myExamplesCount =     (int)PyLong_AsLong(self->myExamplesCount);
-    self->_statusCounter->notmyExamplesCount =  (int)PyLong_AsLong(self->notmyExamplesCount);
+void _updateCCounter(PyServiceErrorCounters* self) {
+    if (self->_statusCounter == NULL) {
+        return;
+    }
+    self->_statusCounter->badTraceCount = (int)PyLong_AsLong(self->badTraceCount);
+    self->_statusCounter->traceCount = (int)PyLong_AsLong(self->traceCount);
+    self->_statusCounter->inTraceSpanCount = (int)PyLong_AsLong(self->inTraceSpanCount);
+    if (PyErr_Occurred()) {
+        return;
+    }
 
-    for (int i = 0; i < self->_statusCounter->myExamplesCount; i++) {
-        self->_statusCounter->myBadTraceExamples[i] = (char*)PyUnicode_AsUTF8(PyList_GetItem(self->myBadTraceExamples, i));
-    }
-    for (int i = 0; i < self->_statusCounter->notmyExamplesCount; i++) {
-        self->_statusCounter->notmyBadTraceExamples[i] = (char*)PyUnicode_AsUTF8(PyList_GetItem(self->notmyBadTraceExamples, i));
-    }
-    for (int i = 0; i < TraceOk + 1; i ++) {
-        self->_statusCounter->statusCounter[i] = (int)PyLong_AsLong(PyDict_GetItemString(self->statusCounter, traceStatusMessage[i]));
-    }
+    UpdateServiceCountersFromDict(
+        &self->_statusCounter->myTraceServiceCounters,
+        self->_statusCounter->myTraceStatusCounter,
+        self->myTraces
+    );
+    UpdateServiceCountersFromDict(
+        &self->_statusCounter->notmyTraceServiceCounters,
+        self->_statusCounter->notmyTraceStatusCounter,
+        self->notmyTraces
+    );
 }
 
-void _updatePyCounter(PyCounters* self, ServiceErrorCounters* counters) {
+void _updatePyCounter(PyServiceErrorCounters* self, ServiceErrorCounters* counters) {
     self->_statusCounter = counters;
     self->ownsStatusCounter = false;
     _updatePyCounterFields(self);
 }
 
-PyMethodDef PyCounters_methods[] = {
+PyMethodDef PyServiceErrorCounters_methods[] = {
     {NULL}
 };
 
-PyMemberDef PyCounters_members[] = {
-    {"myBadTraceExamples", T_OBJECT_EX, offsetof(PyCounters, myBadTraceExamples), 0, "My bad trace examples"},
-    {"notmyBadTraceExamples", T_OBJECT_EX, offsetof(PyCounters, notmyBadTraceExamples), 0, "Not my bad trace examples"},
-    {"myExamplesCount", T_OBJECT_EX, offsetof(PyCounters, myExamplesCount), 0, "My examples count"},
-    {"notmyExamplesCount", T_OBJECT_EX, offsetof(PyCounters, notmyExamplesCount), 0, "Not my examples count"},
-    {"serviceName", T_OBJECT_EX, offsetof(PyCounters, serviceName), 0, "Service name"},
-    {"badTraceCount", T_OBJECT_EX, offsetof(PyCounters, badTraceCount), 0, "Bad trace count"},
-    {"mySpanCount", T_OBJECT_EX, offsetof(PyCounters, mySpanCount), 0, "My span count"},
-    {"notmySpanCount", T_OBJECT_EX, offsetof(PyCounters, notmySpanCount), 0, "Not my span count"},
-    {"traceCount", T_OBJECT_EX, offsetof(PyCounters, traceCount), 0, "Trace count"},
-    {"inTraceSpanCount", T_OBJECT_EX, offsetof(PyCounters, inTraceSpanCount), 0, "In trace span count"},
-    {"statusCounters", T_OBJECT_EX, offsetof(PyCounters, statusCounter), 0, "Trace count"},
+PyMemberDef PyServiceErrorCounters_members[] = {
+    {"myTraces", T_OBJECT_EX, offsetof(PyServiceErrorCounters, myTraces), 0, "Counters for traces owned by this service"},
+    {"notmyTraces", T_OBJECT_EX, offsetof(PyServiceErrorCounters, notmyTraces), 0, "Counters for traces owned by other services"},
+    {"serviceName", T_OBJECT_EX, offsetof(PyServiceErrorCounters, serviceName), 0, "Service name"},
+    {"badTraceCount", T_OBJECT_EX, offsetof(PyServiceErrorCounters, badTraceCount), 0, "Bad trace count"},
+    {"traceCount", T_OBJECT_EX, offsetof(PyServiceErrorCounters, traceCount), 0, "Trace count"},
+    {"inTraceSpanCount", T_OBJECT_EX, offsetof(PyServiceErrorCounters, inTraceSpanCount), 0, "In trace span count"},
     {NULL}
 };
 
-PyTypeObject PyCountersType = {
+PyTypeObject PyServiceErrorCountersType = {
     PyVarObject_HEAD_INIT(NULL, 0)
     .tp_name = "pywrapper.Counters",
     .tp_doc = "Counters objects",
-    .tp_basicsize = sizeof(PyCounters),
+    .tp_basicsize = sizeof(PyServiceErrorCounters),
     .tp_itemsize = 0,
     .tp_flags = Py_TPFLAGS_DEFAULT,
-    .tp_new = PyCounters_new,
-    .tp_init = (initproc)PyCounters_init,
-    .tp_dealloc = (destructor)PyCounters_dealloc,
-    .tp_methods = PyCounters_methods,
-    .tp_members = PyCounters_members,
+    .tp_new = PyServiceErrorCounters_new,
+    .tp_init = (initproc)PyServiceErrorCounters_init,
+    .tp_dealloc = (destructor)PyServiceErrorCounters_dealloc,
+    .tp_methods = PyServiceErrorCounters_methods,
+    .tp_members = PyServiceErrorCounters_members,
 };
 
 // span
@@ -367,7 +491,7 @@ PyObject* PyService_new(PyTypeObject* type, PyObject* args, PyObject* kwds) {
     PyService* self;
     self = (PyService*)type->tp_alloc(type, 0);
     if (self != NULL) {
-        self->errorCounters = (PyCounters*)PyObject_CallObject((PyObject*)&PyCountersType, NULL);
+        self->errorCounters = (PyServiceErrorCounters*)PyObject_CallObject((PyObject*)&PyServiceErrorCountersType, NULL);
         self->serviceName = PyUnicode_FromString("");
     }
     return (PyObject*)self;
@@ -389,7 +513,7 @@ void _updatePyService(PyService* self, Service* service) {
         return;
     }
 
-    PyCounters* errorCounters = (PyCounters*)PyObject_CallObject((PyObject*)&PyCountersType, NULL);
+    PyServiceErrorCounters* errorCounters = (PyServiceErrorCounters*)PyObject_CallObject((PyObject*)&PyServiceErrorCountersType, NULL);
     if (errorCounters == NULL) {
         Py_DECREF(serviceName);
         return;
@@ -419,7 +543,10 @@ PyObject* PyService_is_ok(PyService* self, PyObject* Py_UNUSED(ignored)) {
         Py_RETURN_TRUE;
     }
     for (int i = 0; i < TraceOk; i++) {
-        if (self->errorCounters->_statusCounter->statusCounter[i] != 0) {
+        if (
+            self->errorCounters->_statusCounter->myTraceStatusCounter[i] != 0 ||
+            self->errorCounters->_statusCounter->notmyTraceStatusCounter[i] != 0
+        ) {
             Py_RETURN_FALSE;
         }
     }

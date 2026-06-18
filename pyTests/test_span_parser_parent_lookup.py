@@ -25,8 +25,8 @@ class SpanParserParentLookupTest(unittest.TestCase):
 
         counters = analyzer.get_counters("svc")
 
-        self.assertEqual(counters["myNoParentInTrace"], 0)
-        self.assertEqual(counters["mySpanCount"], 2)
+        self.assertEqual(counters["my-traces"]["statusCounters"]["myNoParentInTrace"], 0)
+        self.assertEqual(counters["my-traces"]["mySpanCount"], 2)
 
     def test_missing_parent_is_reported_once(self):
         analyzer = Analyzer()
@@ -34,8 +34,8 @@ class SpanParserParentLookupTest(unittest.TestCase):
 
         counters = analyzer.get_counters("svc")
 
-        self.assertEqual(counters["myNoParentInTrace"], 1)
-        self.assertEqual(counters["myExamples"], ["2" * 32])
+        self.assertEqual(counters["my-traces"]["statusCounters"]["myNoParentInTrace"], 1)
+        self.assertEqual(counters["my-traces"]["myExamples"], ["2" * 32])
 
     def test_analyze_does_not_print_trace_debug_output(self):
         analyzer = Analyzer()

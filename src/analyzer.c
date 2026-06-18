@@ -1,4 +1,5 @@
 #include "analyzer.h"
+#include <string.h>
 
 void InitAnalyzer(Analyzer* analyzer) {
     analyzer->serviceMap = GetStringToServiceMap();
@@ -15,10 +16,9 @@ void FreeAnalyzer(Analyzer* analyzer) {
 }
 
 void AddTrace(Analyzer* analyzer, Trace* trace) {
-    struct StringToTrace* stringToTrace = (struct StringToTrace*)malloc(sizeof(struct StringToTrace));
-    InitStringToTrace(stringToTrace, trace->traceId, trace);
-    hashmap_set(analyzer->traceMap, stringToTrace);
-    free(stringToTrace);
+    struct StringToTrace stringToTrace;
+    InitStringToTrace(&stringToTrace, trace->traceId, trace);
+    hashmap_set(analyzer->traceMap, &stringToTrace);
 }
 
 Service* GetAddService(Analyzer* analyzer, const char* serviceName) {
@@ -36,27 +36,28 @@ void ParceTrace(Analyzer* analyzer, Trace* trace) {
     FindAllSpans(trace);
     int badSpanCount = 0;
     Service* myService = GetAddService(analyzer, trace->serviceName);
-    ServiceErrorCounters* tmpCounters = (ServiceErrorCounters*)malloc(sizeof(ServiceErrorCounters));
     myService->errorCounters->traceCount++;
     myService->errorCounters->inTraceSpanCount += trace->spansCount;
-    InitServiceErrorCounters(tmpCounters);
+    bool haveSeenRootSpan = false;
     for(int i = 0; i < trace->spansCount; i++) {
         if(trace->spans[i]->spanStatus == NoServiceName) {
-            IncCounters(tmpCounters, NoServiceName, true);
-            AppendExample(tmpCounters, trace->traceId, true);
-            tmpCounters->badTraceCount++;
+            IncCounters(myService->errorCounters, NoServiceName, true, true);
+            AppendExample(myService->errorCounters, trace->traceId, true, true);
+            trace->goodTrace = false;
             continue;
         }
         bool isMy = strcmp(trace->serviceName, trace->spans[i]->serviceName) == 0;
-        myService->errorCounters->mySpanCount += isMy;
-        Service* notmyService = NULL;
-        if(!isMy) {
-            notmyService = GetAddService(analyzer, trace->spans[i]->serviceName);
-            notmyService->errorCounters->notmySpanCount++;
-        }
+        myService->errorCounters->myTraceServiceCounters.mySpanCount += isMy;
+        myService->errorCounters->myTraceServiceCounters.notmySpanCount += !isMy;
+
         if(trace->spans[i]->parentSpanId == NULL) {
-            trace->spans[i]->spanStatus = MissingParent;
-            badSpanCount++;
+            if(!haveSeenRootSpan) {
+                trace->spans[i]->spanStatus = SpanOk;
+                haveSeenRootSpan = true;
+            } else {
+                trace->spans[i]->spanStatus = MissingParent;
+                badSpanCount++;
+            }
         } else {
             if(FindSpan(trace->spans, trace->spansCount, trace->spans[i]->parentSpanId) == NULL) {
                 trace->spans[i]->spanStatus = NoParentInTrace;
@@ -66,29 +67,31 @@ void ParceTrace(Analyzer* analyzer, Trace* trace) {
                 trace->spans[i]->spanStatus = BadSpanIdSize;
                 badSpanCount++;
             }
+            if(strcmp(trace->spans[i]->parentSpanId, trace->spans[i]->spanId) == 0) {
+                trace->spans[i]->spanStatus = SelfParent;
+                badSpanCount++;
+            }
         }
         if(trace->spans[i]->spanStatus == UndefSpanStatus) {
             trace->spans[i]->spanStatus = SpanOk;
         }
-        if(trace->spans[i]->spanStatus == SpanOk) {
-            continue;
-        }
         if(isMy) {
-            IncCounters(tmpCounters, trace->spans[i]->spanStatus, isMy);
-            AppendExample(tmpCounters, trace->traceId, isMy);
-            tmpCounters->badTraceCount++;
+            IncCounters(myService->errorCounters, trace->spans[i]->spanStatus, true, true);
+            if(trace->spans[i]->spanStatus != SpanOk)
+                AppendExample(myService->errorCounters, trace->traceId, true, true);
         } else {
-            IncCounters(notmyService->errorCounters, trace->spans[i]->spanStatus, isMy);
-            AppendExample(notmyService->errorCounters, trace->traceId, isMy);
+            Service* notmyService = GetAddService(analyzer, trace->spans[i]->serviceName);
+            notmyService->errorCounters->notmyTraceServiceCounters.mySpanCount++;
+            IncCounters(notmyService->errorCounters, trace->spans[i]->spanStatus,false, true);
+            IncCounters(myService->errorCounters, trace->spans[i]->spanStatus, true, false);
+            if(trace->spans[i]->spanStatus != SpanOk) {
+                AppendExample(notmyService->errorCounters, trace->traceId, false, true);
+                AppendExample(myService->errorCounters, trace->traceId, true, false);
+            }
         }
+        trace->goodTrace = trace->goodTrace * (trace->spans[i]->spanStatus == SpanOk);
     }
-    if(!IsRootSpanError(tmpCounters)) {
-        sumCounters(myService->errorCounters, tmpCounters);
-        AppendExample(myService->errorCounters, trace->traceId, 1);
-    } else {
-            IncCounters(myService->errorCounters, SpanOk, true);
-    }
-    FreeServiceErrorCounters(tmpCounters);
+    myService->errorCounters->badTraceCount += !trace->goodTrace;
 }
 
 void RunPlugins(Analyzer* analyzer, Trace* trace) {

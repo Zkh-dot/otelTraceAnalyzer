@@ -1,33 +1,99 @@
 #include "py_translator.h"
 
-ServiceErrorCounters* PyCounters2Counters(PyObject* src) {
+ServiceErrorCounters* PyServiceErrorCounters2Counters(PyObject* src) {
     
-    return ((PyCounters*)src)->_statusCounter;
+    return ((PyServiceErrorCounters*)src)->_statusCounter;
+}
+
+static int set_dict_item_steal(PyObject* dict, const char* key, PyObject* value) {
+    if (value == NULL) {
+        return -1;
+    }
+    int result = PyDict_SetItemString(dict, key, value);
+    Py_DECREF(value);
+    return result;
+}
+
+static PyObject* TraceStatusCounters2Dict(int* statusCounters) {
+    PyObject* dict = PyDict_New();
+    if (dict == NULL) {
+        return NULL;
+    }
+
+    for(int i = 0; i < TraceOk + 1; i++) {
+        if (set_dict_item_steal(dict, traceStatusMessage[i], PyLong_FromLong(statusCounters[i])) < 0) {
+            Py_DECREF(dict);
+            return NULL;
+        }
+    }
+
+    return dict;
+}
+
+static PyObject* BadTraceExamples2List(char** examples, int examplesCount) {
+    PyObject* list = PyList_New(examplesCount);
+    if (list == NULL) {
+        return NULL;
+    }
+
+    for(int i = 0; i < examplesCount; i++) {
+        PyObject* value = PyUnicode_FromString(examples[i] != NULL ? examples[i] : "");
+        if (value == NULL) {
+            Py_DECREF(list);
+            return NULL;
+        }
+        PyList_SET_ITEM(list, i, value);
+    }
+
+    return list;
+}
+
+static PyObject* ServiceCounters2Dict(ServiceCounters* counters, int* statusCounters) {
+    PyObject* dict = PyDict_New();
+    if (dict == NULL) {
+        return NULL;
+    }
+
+    if (
+        set_dict_item_steal(dict, "statusCounters", TraceStatusCounters2Dict(statusCounters)) < 0 ||
+        set_dict_item_steal(dict, "myExamples", BadTraceExamples2List(counters->myBadTraceExamples, counters->myExamplesCount)) < 0 ||
+        set_dict_item_steal(dict, "notmyExamples", BadTraceExamples2List(counters->notmyBadTraceExamples, counters->notmyExamplesCount)) < 0 ||
+        set_dict_item_steal(dict, "myExamplesCount", PyLong_FromLong(counters->myExamplesCount)) < 0 ||
+        set_dict_item_steal(dict, "notmyExamplesCount", PyLong_FromLong(counters->notmyExamplesCount)) < 0 ||
+        set_dict_item_steal(dict, "mySpanCount", PyLong_FromLong(counters->mySpanCount)) < 0 ||
+        set_dict_item_steal(dict, "notmySpanCount", PyLong_FromLong(counters->notmySpanCount)) < 0
+    ) {
+        Py_DECREF(dict);
+        return NULL;
+    }
+
+    return dict;
 }
 
 PyObject* Counters2Dict(ServiceErrorCounters* counters) {
     PyObject* dict = PyDict_New();
-    for(int i = 0; i < TraceOk + 1; i++) {
-        PyDict_SetItemString(dict, traceStatusMessage[i], PyLong_FromLong(counters->statusCounter[i]));
+    if (dict == NULL) {
+        return NULL;
     }
-    PyObject* myExamples = PyList_New(counters->myExamplesCount);
-    for(int i = 0; i < counters->myExamplesCount; i++) {
-        PyList_SetItem(myExamples, i, PyUnicode_FromString(counters->myBadTraceExamples[i]));
+
+    if (
+        set_dict_item_steal(dict, "my-traces", ServiceCounters2Dict(&counters->myTraceServiceCounters, counters->myTraceStatusCounter)) < 0 ||
+        set_dict_item_steal(dict, "notmy-traces", ServiceCounters2Dict(&counters->notmyTraceServiceCounters, counters->notmyTraceStatusCounter)) < 0 ||
+        set_dict_item_steal(dict, "badTraceCount", PyLong_FromLong(counters->badTraceCount)) < 0 ||
+        set_dict_item_steal(dict, "traceCount", PyLong_FromLong(counters->traceCount)) < 0 ||
+        set_dict_item_steal(dict, "inTraceSpanCount", PyLong_FromLong(counters->inTraceSpanCount)) < 0
+    ) {
+        Py_DECREF(dict);
+        return NULL;
     }
-    PyObject* notmyExamples = PyList_New(counters->notmyExamplesCount);
-    for(int i = 0; i < counters->notmyExamplesCount; i++) {
-        PyList_SetItem(notmyExamples, i, PyUnicode_FromString(counters->notmyBadTraceExamples[i]));
+
+    if (counters->serviceName != NULL) {
+        if (set_dict_item_steal(dict, "serviceName", PyUnicode_FromString(counters->serviceName)) < 0) {
+            Py_DECREF(dict);
+            return NULL;
+        }
     }
-    PyDict_SetItemString(dict, "myExamples", myExamples);
-    PyDict_SetItemString(dict, "notmyExamples", notmyExamples);
-    Py_DECREF(myExamples);
-    Py_DECREF(notmyExamples);
-    PyDict_SetItemString(dict, "badTraceCount", PyLong_FromLong(counters->badTraceCount));
-    PyDict_SetItemString(dict, "mySpanCount", PyLong_FromLong(counters->mySpanCount));
-    PyDict_SetItemString(dict, "notmySpanCount", PyLong_FromLong(counters->notmySpanCount));
-    PyDict_SetItemString(dict, "traceCount", PyLong_FromLong(counters->traceCount));
-    PyDict_SetItemString(dict, "inTraceSpanCount", PyLong_FromLong(counters->inTraceSpanCount));
-    
+
     return dict;
 }
 

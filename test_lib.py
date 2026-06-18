@@ -4,10 +4,9 @@ import json
 
 def lambda_func(d: dict[str, Counters], t: Trace):
     print("wow!")
-    d["some-name"].mySpanCount = 9999999
-    d["some-name"].myBadTraceExamples.append("pipa")
-    d["some-name"].statusCounters["myNoParentInTrace"] = 10
-    d["some-name"].myExamplesCount += 1
+    d["some-name"].myTraces["mySpanCount"] = 9999999
+    d["some-name"].myTraces["myExamples"].append("pipa")
+    d["some-name"].myTraces["statusCounters"]["myNoParentInTrace"] = 10
     return d
 
 def test(a: Analyzer, t: str = "", i: int = 0):
@@ -78,10 +77,19 @@ def test_all_services(a: Analyzer, t: str):
 
 def test_plugin(a: Analyzer, t: str):
     a.plg_manager.add_plugin(lambda_func)
+    a.analyze(t, 'some-name', '1' * 32)
+    # print(a.get_all_counters())
+    counters = a.get_counters_obj('some-name')
+    print(counters.myTraces["mySpanCount"])
+    print(counters.myTraces["myExamples"])
+    # assert counters.myTraces["mySpanCount"] == 9999999
+    # assert counters.myTraces["myExamples"] == ["pipa"]
+    # assert counters.myTraces["statusCounters"]["myNoParentInTrace"] == 10
+    print("python plugin test ok")
 
 if __name__ == '__main__':
     
-    t = "[{'spanId': '0000000000000000', 'serviceName': 'some-name', 'traceId': '00000000000000000000000000000000', 'project': 'some-project', 'service': 'some-service'}, {'spanId': '0000000000000001', 'serviceName': 'some-name', 'traceId': '00000000000000000000000000000000', 'parentSpanId': '0000000000000000' 'project': 'some-project', 'service': 'some-service'}, {'spanId': '0000000000000002', 'serviceName': 'some-name', 'traceId': '00000000000000000000000000000000', 'parentSpanId': '0000000000000003' 'project': 'some-project', 'service': 'some-service'}]"
+    t = "[{'spanId': '0000000000000000', 'serviceName': 'some-name', 'traceId': '00000000000000000000000000000000', 'project': 'some-project', 'service': 'some-service'}, {'spanId': '0000000000000001', 'serviceName': 'some-name', 'traceId': '00000000000000000000000000000000', 'parentSpanId': '0000000000000000' 'project': 'some-project', 'service': 'some-service'}, {'spanId': '0000000000000002', 'serviceName': 'some-name', 'traceId': '00000000000000000000000000000000', 'parentSpanId': '0000000000000003' 'project': 'some-project', 'service': 'some-service'}, {'spanId': '0000000000000004', 'serviceName': 'other-name', 'traceId': '00000000000000000000000000000000', 'parentSpanId': '0000000000000002' 'project': 'some-project', 'service': 'other-service'}]"
     # t = "[{'spanId': '0000000000000000', 'serviceName': 'some-name', 'parentSpanId': '0000000000000000', 'traceId': '00000000000000000000000000000000', 'project': 'some-project', 'service': 'some-service'}]"
     a = Analyzer()
     # test(a, t)
@@ -91,5 +99,7 @@ if __name__ == '__main__':
     # testAllCounters(a, t)
     # test_service(a, t)
     # test_all_services(a, t)
-    # test_plugin(a, t)
-    testTrace(a, t)
+    test_plugin(a, t)
+    # testTrace(a, t)
+
+    
